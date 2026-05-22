@@ -1333,6 +1333,17 @@ const SETTINGS_SCHEMA = {
         description: 'Whether to load memory files from include directories.',
         showInDialog: false,
       },
+      globalInitPrompts: {
+        type: 'array',
+        label: 'Global Init Prompts',
+        category: 'Context',
+        requiresRestart: false,
+        default: [] as string[],
+        description:
+          'Absolute paths to files whose contents will be appended to the system prompt at session start. Files are read in order and concatenated. Non-existent files are silently skipped.',
+        showInDialog: false,
+        mergeStrategy: MergeStrategy.CONCAT,
+      },
       clearContextOnIdle: {
         type: 'object',
         label: 'Clear Context On Idle',

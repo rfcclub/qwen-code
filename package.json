@@ -1,6 +1,6 @@
 {
-  "name": "@qwen-code/qwen-code",
-  "version": "0.16.1",
+  "name": "@qwen-code/qwen-lyra",
+  "version": "0.16.0",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -18,7 +18,7 @@
     "url": "git+https://github.com/QwenLM/qwen-code.git"
   },
   "config": {
-    "sandboxImageUri": "ghcr.io/qwenlm/qwen-code:0.16.1"
+    "sandboxImageUri": "ghcr.io/qwenlm/qwen-code:0.16.0"
   },
   "scripts": {
     "start": "cross-env node scripts/start.js",
@@ -88,7 +88,7 @@
     "@types/react-dom": "^19.2.0"
   },
   "bin": {
-    "qwen": "dist/cli.js"
+    "qwen-lyra": "dist/cli.js"
   },
   "files": [
     "dist/",

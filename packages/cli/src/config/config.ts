@@ -1744,6 +1744,7 @@ export async function loadCliConfig(
     loadMemoryFromIncludeDirectories: bareMode
       ? includeDirectories.length > 0
       : (settings.context?.loadFromIncludeDirectories ?? false),
+    globalInitPrompts: settings.context?.globalInitPrompts,
     importFormat: settings.context?.importFormat || 'tree',
     debugMode,
     question,

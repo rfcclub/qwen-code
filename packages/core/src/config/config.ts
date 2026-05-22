@@ -9,6 +9,7 @@ import type { EventEmitter } from 'node:events';
 import * as fs from 'node:fs';
 import * as fsPromises from 'node:fs/promises';
 import * as path from 'node:path';
+import { homedir } from 'node:os';
 import process from 'node:process';
 
 // External dependencies
@@ -685,6 +686,7 @@ export interface ConfigParameters {
   generationConfigSources?: ContentGeneratorConfigSources;
   cliVersion?: string;
   loadMemoryFromIncludeDirectories?: boolean;
+  globalInitPrompts?: string[];
   importFormat?: 'tree' | 'flat';
   chatRecording?: boolean;
   chatCompression?: ChatCompressionSettings;
@@ -985,6 +987,7 @@ export class Config {
   private readonly emitToolUseSummaries: boolean = true;
   private readonly chatRecordingEnabled: boolean;
   private readonly loadMemoryFromIncludeDirectories: boolean = false;
+  private readonly globalInitPrompts: string[];
   private readonly importFormat: 'tree' | 'flat';
   private readonly chatCompression: ChatCompressionSettings | undefined;
   private readonly interactive: boolean;
@@ -1167,6 +1170,7 @@ export class Config {
 
     this.loadMemoryFromIncludeDirectories =
       params.loadMemoryFromIncludeDirectories ?? false;
+    this.globalInitPrompts = params.globalInitPrompts ?? [];
     this.importFormat = params.importFormat ?? 'tree';
     // Auto-compaction threshold moved to built-in constants (computeThresholds
     // in chatCompressionService.ts). The old `contextPercentageThreshold`
@@ -2053,6 +2057,24 @@ export class Config {
 
   getImportFormat(): 'tree' | 'flat' {
     return this.importFormat;
+  }
+
+  getGlobalInitPrompts(): string {
+    const parts: string[] = [];
+    for (const filePath of this.globalInitPrompts) {
+      try {
+        const resolved = filePath.startsWith('~')
+          ? path.join(homedir(), filePath.slice(1))
+          : filePath;
+        const content = fs.readFileSync(resolved, 'utf8').trim();
+        if (content) {
+          parts.push(content);
+        }
+      } catch {
+        // Non-existent or unreadable files are silently skipped
+      }
+    }
+    return parts.join('\n\n---\n\n');
   }
 
   getContentGeneratorConfig(): ContentGeneratorConfig {
