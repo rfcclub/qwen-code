@@ -1995,6 +1995,7 @@ export async function loadCliConfig(
       bareMode || safeMode
         ? includeDirectories.length > 0
         : (settings.context?.loadFromIncludeDirectories ?? false),
+    globalInitPrompts: settings.context?.globalInitPrompts,
     importFormat: settings.context?.importFormat || 'tree',
     debugMode,
     question,

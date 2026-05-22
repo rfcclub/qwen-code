@@ -804,13 +804,19 @@ export class GeminiClient {
     const userMemory = this.config.getUserMemory();
     const overrideSystemPrompt = this.config.getSystemPrompt();
     const appendSystemPrompt = this.config.getAppendSystemPrompt();
+    const globalInitPrompts = this.config.getGlobalInitPrompts();
     const gitStatus = this.getCachedGitStatus();
+
+    // Merge global init prompts with append system prompt
+    const combinedAppend = [appendSystemPrompt, globalInitPrompts]
+      .filter(Boolean)
+      .join('\n\n');
 
     if (overrideSystemPrompt) {
       const base = getCustomSystemPrompt(
         overrideSystemPrompt,
         userMemory,
-        appendSystemPrompt,
+        combinedAppend || undefined,
       );
       return gitStatus ? base + '\n\n' + gitStatus : base;
     }
@@ -818,7 +824,7 @@ export class GeminiClient {
     const base = getCoreSystemPrompt(
       userMemory,
       this.config.getModel(),
-      appendSystemPrompt,
+      combinedAppend || undefined,
       resolveInteractionMode(this.config),
     );
     return gitStatus ? base + '\n\n' + gitStatus : base;
