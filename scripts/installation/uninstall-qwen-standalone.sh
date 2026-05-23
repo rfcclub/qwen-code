@@ -49,8 +49,8 @@ Qwen Code Standalone Uninstaller
 Usage: $0 [OPTIONS]
 
 Options:
-  --purge       Also remove the installer source marker at ~/.qwen/source.json.
-                Other Qwen Code config and auth files are preserved.
+  --purge       Also remove the installer source marker at ~/.qwen-lyra/source.json.
+                Other Qwen Lyra config and auth files are preserved.
   -h, --help    Show this help message.
 
 Environment:
@@ -269,10 +269,10 @@ remove_empty_dir() {
 }
 
 remove_source_marker() {
-    local source_json="${HOME:-}/.qwen/source.json"
+    local source_json="${HOME:-}/.qwen-lyra/source.json"
 
     if [[ "${PURGE}" != "1" ]]; then
-        log_info "Preserving ${HOME:-~}/.qwen (set QWEN_UNINSTALL_PURGE=1 to remove source.json)."
+        log_info "Preserving ${HOME:-~}/.qwen-lyra (set QWEN_UNINSTALL_PURGE=1 to remove source.json)."
         return 0
     fi
 
@@ -281,7 +281,7 @@ remove_source_marker() {
         rm -f "${source_json}"
         log_success "Removed ${source_json}"
     fi
-    remove_empty_dir "${HOME}/.qwen"
+    remove_empty_dir "${HOME}/.qwen-lyra"
 }
 
 validate_options
