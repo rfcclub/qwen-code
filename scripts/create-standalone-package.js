@@ -96,12 +96,12 @@ async function main() {
   fs.mkdirSync(outDir, { recursive: true });
 
   const targetConfig = TARGETS.get(target);
-  const outputName = `qwen-code-${target}.${targetConfig.outputExtension}`;
+  const outputName = `qwen-lyra-${target}.${targetConfig.outputExtension}`;
   const outputPath = path.join(outDir, outputName);
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'qwen-standalone-'));
 
   try {
-    const packageRoot = path.join(tempRoot, 'qwen-code');
+    const packageRoot = path.join(tempRoot, 'qwen-lyra');
     const runtimeExtractDir = path.join(tempRoot, 'runtime');
     fs.mkdirSync(packageRoot, { recursive: true });
     fs.mkdirSync(runtimeExtractDir, { recursive: true });
@@ -493,7 +493,7 @@ set -e
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 exec "$ROOT/node/bin/node" "$ROOT/lib/cli.js" "$@"
 `;
-  const unixShimPath = path.join(binDir, 'qwen');
+  const unixShimPath = path.join(binDir, 'qwen-lyra');
   fs.writeFileSync(unixShimPath, unixShim);
   fs.chmodSync(unixShimPath, 0o755);
 
@@ -502,7 +502,7 @@ setlocal
 set "ROOT=%~dp0.."
 "%ROOT%\\node\\node.exe" "%ROOT%\\lib\\cli.js" %*
 `;
-  fs.writeFileSync(path.join(binDir, 'qwen.cmd'), windowsShim);
+  fs.writeFileSync(path.join(binDir, 'qwen-lyra.cmd'), windowsShim);
 }
 
 function writeManifest(packageRoot, manifest) {
@@ -511,7 +511,7 @@ function writeManifest(packageRoot, manifest) {
     manifestPath,
     JSON.stringify(
       {
-        name: '@qwen-code/qwen-code',
+        name: '@qwen-code/qwen-lyra',
         version: manifest.version,
         target: manifest.target,
         nodeArchive: manifest.nodeArchive,
@@ -529,7 +529,7 @@ function createArchive(outputExtension, outputPath, cwd) {
     return;
   }
 
-  run('tar', ['-czf', outputPath, '-C', cwd, 'qwen-code']);
+  run('tar', ['-czf', outputPath, '-C', cwd, 'qwen-lyra']);
 }
 
 function createZipArchive(outputPath, cwd) {
@@ -546,7 +546,7 @@ function createZipArchive(outputPath, cwd) {
       {
         env: {
           ...process.env,
-          QWEN_PACKAGE_ROOT: path.join(cwd, 'qwen-code'),
+          QWEN_PACKAGE_ROOT: path.join(cwd, 'qwen-lyra'),
           QWEN_OUTPUT_PATH: outputPath,
         },
       },
@@ -554,7 +554,7 @@ function createZipArchive(outputPath, cwd) {
     return;
   }
 
-  run('zip', ['-qr', outputPath, 'qwen-code'], { cwd });
+  run('zip', ['-qr', outputPath, 'qwen-lyra'], { cwd });
 }
 
 async function writeSha256Sums(outDir) {
@@ -562,14 +562,14 @@ async function writeSha256Sums(outDir) {
     .readdirSync(outDir)
     .filter(
       (entry) =>
-        entry.startsWith('qwen-code-') &&
+        entry.startsWith('qwen-lyra-') &&
         (entry.endsWith('.tar.gz') || entry.endsWith('.zip')),
     )
     .sort();
 
   if (entries.length === 0) {
     fail(
-      `No qwen-code archives found in ${outDir}; refusing to write empty SHA256SUMS.`,
+      `No qwen-lyra archives found in ${outDir}; refusing to write empty SHA256SUMS.`,
     );
   }
 

@@ -74,7 +74,7 @@ if [[ -n "${QWEN_INSTALL_LIB_DIR:-}" ]]; then
     INSTALL_LIB_PARENT="$(dirname "${INSTALL_LIB_DIR}")"
 else
     INSTALL_LIB_PARENT="${QWEN_INSTALL_LIB_PARENT:-${INSTALL_ROOT}/lib}"
-    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-code"
+    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-lyra"
 fi
 INSTALL_BIN_DIR="${QWEN_INSTALL_BIN_DIR:-${INSTALL_ROOT}/bin}"
 
@@ -132,9 +132,9 @@ is_qwen_standalone_install_dir() {
 
     [[ -d "${install_dir}" ]] || return 1
     [[ -f "${manifest_path}" ]] || return 1
-    grep -Eq '"name"[[:space:]]*:[[:space:]]*"@qwen-code/qwen-code"' "${manifest_path}" 2>/dev/null || return 1
+    grep -Eq '"name"[[:space:]]*:[[:space:]]*"@qwen-code/qwen-lyra"' "${manifest_path}" 2>/dev/null || return 1
     grep -Eq '"target"[[:space:]]*:[[:space:]]*"(darwin|linux)-(arm64|x64)"' "${manifest_path}" 2>/dev/null || return 1
-    [[ -f "${install_dir}/bin/qwen" && ! -L "${install_dir}/bin/qwen" && -x "${install_dir}/bin/qwen" ]] || return 1
+    [[ -f "${install_dir}/bin/qwen-lyra" && ! -L "${install_dir}/bin/qwen-lyra" && -x "${install_dir}/bin/qwen-lyra" ]] || return 1
     [[ -f "${install_dir}/node/bin/node" && ! -L "${install_dir}/node/bin/node" && -x "${install_dir}/node/bin/node" ]] || return 1
 }
 
@@ -143,8 +143,8 @@ shell_quote() {
 }
 
 remove_install_wrapper() {
-    local wrapper_path="${INSTALL_BIN_DIR}/qwen"
-    local qwen_bin="${INSTALL_LIB_DIR}/bin/qwen"
+    local wrapper_path="${INSTALL_BIN_DIR}/qwen-lyra"
+    local qwen_bin="${INSTALL_LIB_DIR}/bin/qwen-lyra"
 
     if [[ ! -e "${wrapper_path}" ]]; then
         return 0

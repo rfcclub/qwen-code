@@ -988,6 +988,7 @@ export class Config {
   private readonly chatRecordingEnabled: boolean;
   private readonly loadMemoryFromIncludeDirectories: boolean = false;
   private readonly globalInitPrompts: string[];
+  private globalInitPromptsContent: string | undefined;
   private readonly importFormat: 'tree' | 'flat';
   private readonly chatCompression: ChatCompressionSettings | undefined;
   private readonly interactive: boolean;
@@ -2060,6 +2061,10 @@ export class Config {
   }
 
   getGlobalInitPrompts(): string {
+    if (this.globalInitPromptsContent !== undefined) {
+      return this.globalInitPromptsContent;
+    }
+
     const parts: string[] = [];
     for (const filePath of this.globalInitPrompts) {
       try {
@@ -2071,10 +2076,14 @@ export class Config {
           parts.push(content);
         }
       } catch {
-        // Non-existent or unreadable files are silently skipped
+        this.debugLogger.warn(
+          `globalInitPrompts file not found or unreadable: ${filePath}`,
+        );
       }
     }
-    return parts.join('\n\n---\n\n');
+
+    this.globalInitPromptsContent = parts.join('\n\n---\n\n');
+    return this.globalInitPromptsContent;
   }
 
   getContentGeneratorConfig(): ContentGeneratorConfig {

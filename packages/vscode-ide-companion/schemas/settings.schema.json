@@ -581,6 +581,13 @@
           "type": "boolean",
           "default": false
         },
+        "globalInitPrompts": {
+          "description": "Absolute paths to files whose contents will be appended to the system prompt at session start. Files are read in order and concatenated. Non-existent files are silently skipped.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "clearContextOnIdle": {
           "description": "Settings for clearing stale context after idle periods. Use -1 to disable a threshold.",
           "type": "object",

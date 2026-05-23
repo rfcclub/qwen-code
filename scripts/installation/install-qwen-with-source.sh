@@ -115,7 +115,7 @@ if [[ -n "${QWEN_INSTALL_LIB_DIR:-}" ]]; then
     INSTALL_LIB_PARENT="$(dirname "${INSTALL_LIB_DIR}")"
 else
     INSTALL_LIB_PARENT="${QWEN_INSTALL_LIB_PARENT:-${INSTALL_ROOT}/lib}"
-    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-code"
+    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-lyra"
 fi
 INSTALL_BIN_DIR="${QWEN_INSTALL_BIN_DIR:-${INSTALL_ROOT}/bin}"
 
@@ -747,7 +747,7 @@ install_standalone() {
 
         local archive_extension
         archive_extension=$(archive_extension_for_target "${target}")
-        archive_name="qwen-code-${target}.${archive_extension}"
+        archive_name="qwen-lyra-${target}.${archive_extension}"
 
         local base_url
         base_url=$(standalone_base_url)
@@ -789,14 +789,14 @@ install_standalone() {
         return 1
     fi
 
-    if [[ ! -f "${extract_dir}/qwen-code/bin/qwen" || -L "${extract_dir}/qwen-code/bin/qwen" || ! -x "${extract_dir}/qwen-code/bin/qwen" ]]; then
-        log_error "Archive does not contain qwen-code/bin/qwen."
+    if [[ ! -f "${extract_dir}/qwen-lyra/bin/qwen-lyra" || -L "${extract_dir}/qwen-lyra/bin/qwen-lyra" || ! -x "${extract_dir}/qwen-lyra/bin/qwen-lyra" ]]; then
+        log_error "Archive does not contain qwen-lyra/bin/qwen-lyra."
         rm -rf "${temp_dir}"
         return 1
     fi
 
-    if [[ ! -f "${extract_dir}/qwen-code/node/bin/node" || -L "${extract_dir}/qwen-code/node/bin/node" || ! -x "${extract_dir}/qwen-code/node/bin/node" ]]; then
-        log_error "Archive does not contain executable qwen-code/node/bin/node."
+    if [[ ! -f "${extract_dir}/qwen-lyra/node/bin/node" || -L "${extract_dir}/qwen-lyra/node/bin/node" || ! -x "${extract_dir}/qwen-lyra/node/bin/node" ]]; then
+        log_error "Archive does not contain executable qwen-lyra/node/bin/node."
         rm -rf "${temp_dir}"
         return 1
     fi
@@ -809,7 +809,7 @@ install_standalone() {
     # Stage into .new and keep .old so failed upgrades can roll back.
     local new_install_dir="${INSTALL_LIB_DIR}.new"
     local old_install_dir="${INSTALL_LIB_DIR}.old"
-    local wrapper_tmp="${INSTALL_BIN_DIR}/qwen.new"
+    local wrapper_tmp="${INSTALL_BIN_DIR}/qwen-lyra.new"
     if ! ensure_managed_install_dir "${INSTALL_LIB_DIR}" ||
         ! ensure_managed_install_dir "${new_install_dir}" ||
         ! ensure_managed_install_dir "${old_install_dir}"; then
@@ -817,11 +817,11 @@ install_standalone() {
         return 1
     fi
     rm -rf "${new_install_dir}" "${old_install_dir}" "${wrapper_tmp}"
-    mv "${extract_dir}/qwen-code" "${new_install_dir}"
+    mv "${extract_dir}/qwen-lyra" "${new_install_dir}"
 
-    if ! write_unix_wrapper "${wrapper_tmp}" "${INSTALL_LIB_DIR}/bin/qwen"; then
+    if ! write_unix_wrapper "${wrapper_tmp}" "${INSTALL_LIB_DIR}/bin/qwen-lyra"; then
         rm -rf "${temp_dir}" "${new_install_dir}" "${wrapper_tmp}"
-        log_error "Failed to create qwen wrapper in ${INSTALL_BIN_DIR}."
+        log_error "Failed to create qwen-lyra wrapper in ${INSTALL_BIN_DIR}."
         return 1
     fi
 
@@ -838,13 +838,13 @@ install_standalone() {
         return 1
     fi
 
-    if ! mv -f "${wrapper_tmp}" "${INSTALL_BIN_DIR}/qwen"; then
+    if ! mv -f "${wrapper_tmp}" "${INSTALL_BIN_DIR}/qwen-lyra"; then
         rm -rf "${INSTALL_LIB_DIR}" "${wrapper_tmp}"
         if [[ -e "${old_install_dir}" ]]; then
             mv "${old_install_dir}" "${INSTALL_LIB_DIR}"
         fi
         rm -rf "${temp_dir}"
-        log_error "Failed to create qwen wrapper in ${INSTALL_BIN_DIR}."
+        log_error "Failed to create qwen-lyra wrapper in ${INSTALL_BIN_DIR}."
         return 1
     fi
 
@@ -873,24 +873,24 @@ install_npm() {
         npm
         install
         -g
-        @qwen-code/qwen-code@latest
+        @qwen-code/qwen-lyra@latest
         --registry
         "${NPM_REGISTRY}"
     )
 
-    log_info "Running: npm install -g @qwen-code/qwen-code@latest --registry ${NPM_REGISTRY}"
+    log_info "Running: npm install -g @qwen-code/qwen-lyra@latest --registry ${NPM_REGISTRY}"
     if "${install_cmd[@]}"; then
-        log_success "Qwen Code installed successfully."
+        log_success "Qwen Lyra installed successfully."
         create_source_json
         return 0
     fi
 
-    log_error "Failed to install Qwen Code."
+    log_error "Failed to install Qwen Lyra."
     echo ""
     echo "This installer does not change your npm prefix or shell profile."
     echo "If the failure is a permission error, install Node.js with a user-owned"
     echo "Node version manager or fix your npm global package directory, then run:"
-    echo "  npm install -g @qwen-code/qwen-code@latest --registry ${NPM_REGISTRY}"
+    echo "  npm install -g @qwen-code/qwen-lyra@latest --registry ${NPM_REGISTRY}"
     return 1
 }
 

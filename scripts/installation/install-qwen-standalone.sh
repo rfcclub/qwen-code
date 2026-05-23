@@ -128,7 +128,7 @@ if [[ -n "${QWEN_INSTALL_LIB_DIR:-}" ]]; then
     INSTALL_LIB_PARENT="$(dirname "${INSTALL_LIB_DIR}")"
 else
     INSTALL_LIB_PARENT="${QWEN_INSTALL_LIB_PARENT:-${INSTALL_ROOT}/lib}"
-    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-code"
+    INSTALL_LIB_DIR="${INSTALL_LIB_PARENT}/qwen-lyra"
 fi
 INSTALL_BIN_DIR="${QWEN_INSTALL_BIN_DIR:-${INSTALL_ROOT}/bin}"
 
@@ -999,9 +999,9 @@ is_qwen_standalone_install_dir() {
     [[ -f "${manifest_path}" ]] || return 1
     # Manifest format is produced by writeManifest in create-standalone-package.js.
     # Keep these grep checks in sync if that JSON layout changes.
-    grep -Eq '"name"[[:space:]]*:[[:space:]]*"@qwen-code/qwen-code"' "${manifest_path}" 2>/dev/null || return 1
+    grep -Eq '"name"[[:space:]]*:[[:space:]]*"@qwen-code/qwen-lyra"' "${manifest_path}" 2>/dev/null || return 1
     grep -Eq '"target"[[:space:]]*:[[:space:]]*"(darwin|linux)-(arm64|x64)"' "${manifest_path}" 2>/dev/null || return 1
-    [[ -f "${install_dir}/bin/qwen" && ! -L "${install_dir}/bin/qwen" && -x "${install_dir}/bin/qwen" ]] || return 1
+    [[ -f "${install_dir}/bin/qwen-lyra" && ! -L "${install_dir}/bin/qwen-lyra" && -x "${install_dir}/bin/qwen-lyra" ]] || return 1
     [[ -f "${install_dir}/node/bin/node" && ! -L "${install_dir}/node/bin/node" && -x "${install_dir}/node/bin/node" ]] || return 1
 }
 
@@ -1047,7 +1047,7 @@ install_standalone() {
 
         local archive_extension
         archive_extension=$(archive_extension_for_target "${target}")
-        archive_name="qwen-code-${target}.${archive_extension}"
+        archive_name="qwen-lyra-${target}.${archive_extension}"
 
         local requested_mirror="${MIRROR}"
         local requested_version_path=""
@@ -1160,14 +1160,14 @@ install_standalone() {
         return 1
     fi
 
-    if [[ ! -f "${extract_dir}/qwen-code/bin/qwen" || -L "${extract_dir}/qwen-code/bin/qwen" || ! -x "${extract_dir}/qwen-code/bin/qwen" ]]; then
-        log_error "Archive does not contain qwen-code/bin/qwen."
+    if [[ ! -f "${extract_dir}/qwen-lyra/bin/qwen-lyra" || -L "${extract_dir}/qwen-lyra/bin/qwen-lyra" || ! -x "${extract_dir}/qwen-lyra/bin/qwen-lyra" ]]; then
+        log_error "Archive does not contain qwen-lyra/bin/qwen-lyra."
         rm -rf "${temp_dir}"
         return 1
     fi
 
-    if [[ ! -f "${extract_dir}/qwen-code/node/bin/node" || -L "${extract_dir}/qwen-code/node/bin/node" || ! -x "${extract_dir}/qwen-code/node/bin/node" ]]; then
-        log_error "Archive does not contain executable qwen-code/node/bin/node."
+    if [[ ! -f "${extract_dir}/qwen-lyra/node/bin/node" || -L "${extract_dir}/qwen-lyra/node/bin/node" || ! -x "${extract_dir}/qwen-lyra/node/bin/node" ]]; then
+        log_error "Archive does not contain executable qwen-lyra/node/bin/node."
         rm -rf "${temp_dir}"
         return 1
     fi
@@ -1180,7 +1180,7 @@ install_standalone() {
     # Stage into .new and keep .old so failed upgrades can roll back.
     local new_install_dir="${INSTALL_LIB_DIR}.new"
     local old_install_dir="${INSTALL_LIB_DIR}.old"
-    local wrapper_tmp="${INSTALL_BIN_DIR}/qwen.new"
+    local wrapper_tmp="${INSTALL_BIN_DIR}/qwen-lyra.new"
     if ! ensure_managed_install_dir "${INSTALL_LIB_DIR}" ||
         ! ensure_managed_install_dir "${new_install_dir}" ||
         ! ensure_managed_install_dir "${old_install_dir}"; then
@@ -1199,11 +1199,11 @@ install_standalone() {
         }
     fi
     rm -rf "${new_install_dir}" "${wrapper_tmp}"
-    mv "${extract_dir}/qwen-code" "${new_install_dir}"
+    mv "${extract_dir}/qwen-lyra" "${new_install_dir}"
 
-    if ! write_unix_wrapper "${wrapper_tmp}" "${INSTALL_LIB_DIR}/bin/qwen"; then
+    if ! write_unix_wrapper "${wrapper_tmp}" "${INSTALL_LIB_DIR}/bin/qwen-lyra"; then
         rm -rf "${temp_dir}" "${new_install_dir}" "${wrapper_tmp}"
-        log_error "Failed to create qwen wrapper in ${INSTALL_BIN_DIR}."
+        log_error "Failed to create qwen-lyra wrapper in ${INSTALL_BIN_DIR}."
         return 1
     fi
 
@@ -1220,7 +1220,7 @@ install_standalone() {
         return 1
     fi
 
-    if ! mv -f "${wrapper_tmp}" "${INSTALL_BIN_DIR}/qwen"; then
+    if ! mv -f "${wrapper_tmp}" "${INSTALL_BIN_DIR}/qwen-lyra"; then
         rm -rf "${INSTALL_LIB_DIR}" "${wrapper_tmp}"
         if [[ -e "${old_install_dir}" ]]; then
             mv "${old_install_dir}" "${INSTALL_LIB_DIR}"
@@ -1242,12 +1242,12 @@ install_standalone() {
 
 npm_package_spec() {
     if [[ "${VERSION}" == "latest" ]]; then
-        echo "@qwen-code/qwen-code@latest"
+        echo "@qwen-code/qwen-lyra@latest"
         return 0
     fi
 
     local npm_version="${VERSION#v}"
-    echo "@qwen-code/qwen-code@${npm_version}"
+    echo "@qwen-code/qwen-lyra@${npm_version}"
 }
 
 install_npm() {
@@ -1355,7 +1355,7 @@ print_final_instructions() {
     echo ""
     echo "Uninstall:"
     if [[ "${install_method}" == "npm" ]]; then
-        echo "  npm uninstall -g @qwen-code/qwen-code"
+        echo "  npm uninstall -g @qwen-code/qwen-lyra"
     elif [[ -n "${install_dir}" && -n "${install_bin_dir}" ]]; then
         echo "  curl -fsSL ${standalone_uninstall_url} | QWEN_INSTALL_LIB_DIR=$(shell_quote "${install_dir}") QWEN_INSTALL_BIN_DIR=$(shell_quote "${install_bin_dir}") bash"
     else
@@ -1393,7 +1393,7 @@ main() {
         exit 1
     fi
 
-    # Discover all qwen executables on disk BEFORE we install, so the
+    # Discover all qwen-lyra executables on disk BEFORE we install, so the
     # just-installed binary doesn't pollute the search. We can't reliably
     # simulate the user's interactive shell PATH (some tools inject their
     # bin only under a tty), so we enumerate well-known per-tool bin
@@ -1403,26 +1403,26 @@ main() {
             IFS=:
             for dir in $PATH; do
                 [[ -z "${dir}" ]] && continue
-                [[ -x "${dir}/qwen" ]] && echo "${dir}/qwen"
+                [[ -x "${dir}/qwen-lyra" ]] && echo "${dir}/qwen-lyra"
             done
             for candidate in \
-                "${HOME}/.opencode/bin/qwen" \
-                "${HOME}/.bun/bin/qwen" \
-                "${HOME}/.cargo/bin/qwen" \
-                "${HOME}/.deno/bin/qwen" \
-                "${HOME}/.volta/bin/qwen" \
-                "${HOME}/.fnm/bin/qwen" \
-                "${HOME}/.local/bin/qwen" \
-                "${HOME}/Library/pnpm/qwen" \
-                "/usr/local/bin/qwen" \
-                "/opt/homebrew/bin/qwen"; do
+                "${HOME}/.opencode/bin/qwen-lyra" \
+                "${HOME}/.bun/bin/qwen-lyra" \
+                "${HOME}/.cargo/bin/qwen-lyra" \
+                "${HOME}/.deno/bin/qwen-lyra" \
+                "${HOME}/.volta/bin/qwen-lyra" \
+                "${HOME}/.fnm/bin/qwen-lyra" \
+                "${HOME}/.local/bin/qwen-lyra" \
+                "${HOME}/Library/pnpm/qwen-lyra" \
+                "/usr/local/bin/qwen-lyra" \
+                "/opt/homebrew/bin/qwen-lyra"; do
                 [[ -x "${candidate}" ]] && echo "${candidate}"
             done
             if command_exists npm; then
                 local npm_prefix
                 npm_prefix=$(npm prefix -g 2>/dev/null || true)
-                if [[ -n "${npm_prefix}" && -x "${npm_prefix}/bin/qwen" ]]; then
-                    echo "${npm_prefix}/bin/qwen"
+                if [[ -n "${npm_prefix}" && -x "${npm_prefix}/bin/qwen-lyra" ]]; then
+                    echo "${npm_prefix}/bin/qwen-lyra"
                 fi
             fi
         } 2>/dev/null | sort -u
