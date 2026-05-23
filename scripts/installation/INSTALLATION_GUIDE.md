@@ -13,8 +13,8 @@ The installers are intentionally lightweight:
 - They do not edit npm config. Standalone installs may update the shell profile
   or user PATH so the generated `qwen` shim is discoverable.
 - They do not start `qwen` automatically after installation.
-- They store source information in `~/.qwen/source.json` or
-  `%USERPROFILE%\.qwen\source.json` when `--source` is provided.
+- They store source information in `~/.qwen-lyra/source.json` or
+  `%USERPROFILE%\.qwen-lyra\source.json` when `--source` is provided.
 
 Standalone archives include a private Node.js runtime, so users do not need a
 local Node.js installation on the standalone path. Node.js 22 or newer and npm
@@ -183,9 +183,9 @@ Uninstall a standalone Linux/macOS install:
 curl -fsSL https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/uninstall-qwen-standalone.sh | bash
 ```
 
-The uninstaller removes only the standalone runtime, generated `qwen` wrapper,
-and installer-managed shell PATH block. It preserves `~/.qwen` by default. Set
-`QWEN_UNINSTALL_PURGE=1` to remove `~/.qwen/source.json`; other config and auth
+The uninstaller removes only the standalone runtime, generated `qwen-lyra` wrapper,
+and installer-managed shell PATH block. It preserves `~/.qwen-lyra` by default. Set
+`QWEN_UNINSTALL_PURGE=1` to remove `~/.qwen-lyra/source.json`; other config and auth
 files are still preserved.
 
 ## Windows Usage
@@ -224,10 +224,10 @@ Uninstall a standalone Windows install:
 powershell -ExecutionPolicy Bypass -c "irm https://qwen-code-assets.oss-cn-hangzhou.aliyuncs.com/installation/uninstall-qwen-standalone.ps1 | iex"
 ```
 
-The uninstaller removes only the standalone runtime, generated `qwen.cmd`
+The uninstaller removes only the standalone runtime, generated `qwen-lyra.cmd`
 wrapper, user PATH entry, and the current-session `cmd.exe` shim created by the
-hosted PowerShell installer. It preserves `%USERPROFILE%\.qwen` by default. Set
-`QWEN_UNINSTALL_PURGE=1` to remove `%USERPROFILE%\.qwen\source.json`; other
+hosted PowerShell installer. It preserves `%USERPROFILE%\.qwen-lyra` by default. Set
+`QWEN_UNINSTALL_PURGE=1` to remove `%USERPROFILE%\.qwen-lyra\source.json`; other
 config and auth files are still preserved.
 
 ## Mirrors and Overrides
@@ -284,8 +284,8 @@ When `--source` or `-s` is provided, the installer writes:
 
 Locations:
 
-- Linux/macOS: `~/.qwen/source.json`
-- Windows: `%USERPROFILE%\.qwen\source.json`
+- Linux/macOS: `~/.qwen-lyra/source.json`
+- Windows: `%USERPROFILE%\.qwen-lyra\source.json`
 
 The telemetry logger reads this file when available. Missing, invalid, or
 unreadable source files are ignored.

@@ -412,7 +412,7 @@ create_source_json() {
         return 0
     fi
 
-    local qwen_dir="${HOME}/.qwen"
+    local qwen_dir="${HOME}/.qwen-lyra"
     mkdir -p "${qwen_dir}"
 
     local escaped_source
@@ -424,7 +424,7 @@ create_source_json() {
 }
 EOF
 
-    log_success "Installation source saved to ~/.qwen/source.json"
+    log_success "Installation source saved to ~/.qwen-lyra/source.json"
 }
 
 detect_target() {
