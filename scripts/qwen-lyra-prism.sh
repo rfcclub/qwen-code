@@ -10,18 +10,19 @@ set -euo pipefail
 # Usage:
 #   qwen-lyra-prism.sh [TENSION.md] [REFRACTION.md]
 
-LYRA_DIR="${HOME}/agora/familia/lyra"
-PRISM_DIR="${LYRA_DIR}/prism"
+HIVE_PRISM_DIR="${HOME}/agora/hive/prism"
+LYRA_PRISM_DIR="${HOME}/agora/familia/lyra/prism"
 
-DEFAULT_TENSION="${PRISM_DIR}/current/TENSION.md"
-DEFAULT_REFRACTION="${PRISM_DIR}/current/REFRACTION.md"
+# Default to hive prism for pulse cycle, allow override via args
+DEFAULT_TENSION="${HIVE_PRISM_DIR}/current/TENSION.md"
+DEFAULT_REFRACTION="${HIVE_PRISM_DIR}/current/REFRACTION.md"
 
 tension_file="${1:-$DEFAULT_TENSION}"
 refraction_file="${2:-$DEFAULT_REFRACTION}"
 
 prompt="PRISM REFRACTION
 
-Observe the colony through the five axes. Read ${PRISM_DIR}/current/ for tension and existing refraction. Re-enter via substrate.
+Observe the colony through the five axes. Read ${tension_file} for tension and ${refraction_file} for existing refraction. Re-enter via substrate.
 
 Write REFRACTION to ${refraction_file}. Format: Agents Involved | Tension | Reveal (not Resolve) | Self-Check: reveal vs arrange.
 

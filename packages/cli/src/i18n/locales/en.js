@@ -436,13 +436,6 @@ export default {
   'Show Citations': 'Show Citations',
   'Custom Witty Phrases': 'Custom Witty Phrases',
   'Show Welcome Back Dialog': 'Show Welcome Back Dialog',
-  'Enable User Feedback': 'Enable User Feedback',
-  'How is Qwen doing this session? (optional)':
-    'How is Qwen doing this session? (optional)',
-  Bad: 'Bad',
-  Fine: 'Fine',
-  Good: 'Good',
-  Dismiss: 'Dismiss',
   'Screen Reader Mode': 'Screen Reader Mode',
   'Max Session Turns': 'Max Session Turns',
   'Skip Next Speaker Check': 'Skip Next Speaker Check',

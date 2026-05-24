@@ -412,13 +412,6 @@ export default {
   'Show Citations': 'Mostrar cites',
   'Custom Witty Phrases': 'Frases enginyoses personalitzades',
   'Show Welcome Back Dialog': 'Mostrar el diàleg de benvinguda',
-  'Enable User Feedback': 'Activar les valoracions dels usuaris',
-  'How is Qwen doing this session? (optional)':
-    'Com va Qwen en aquesta sessió? (opcional)',
-  Bad: 'Malament',
-  Fine: 'Bé',
-  Good: 'Molt bé',
-  Dismiss: 'Descartar',
   'Screen Reader Mode': 'Mode de lector de pantalla',
   'Max Session Turns': 'Torns màxims de sessió',
   'Skip Next Speaker Check': 'Ometre la comprovació del proper parlant',

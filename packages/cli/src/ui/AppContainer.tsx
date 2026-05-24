@@ -103,7 +103,6 @@ const STARTUP_PROFILE_FINALIZE_CAP_MS = 35_000;
 import { useHistory } from './hooks/useHistoryManager.js';
 import { useMemoryMonitor } from './hooks/useMemoryMonitor.js';
 import { useThemeCommand } from './hooks/useThemeCommand.js';
-import { useFeedbackDialog } from './hooks/useFeedbackDialog.js';
 import { useAuthCommand } from './auth/useAuth.js';
 import { useEditorSettings } from './hooks/useEditorSettings.js';
 import { usePreferredEditor } from './hooks/usePreferredEditor.js';
@@ -2254,19 +2253,6 @@ export const AppContainer = (props: AppContainerProps) => {
     needsRestart: ideNeedsRestart,
     restartReason: ideTrustRestartReason,
   } = useIdeTrustListener();
-  const {
-    isFeedbackDialogOpen,
-    openFeedbackDialog,
-    closeFeedbackDialog,
-    temporaryCloseFeedbackDialog,
-    submitFeedback,
-  } = useFeedbackDialog({
-    config,
-    settings,
-    streamingState,
-    history: historyManager.history,
-    sessionStats,
-  });
   const dialogsVisible =
     showWelcomeBackDialog ||
     shouldShowIdePrompt ||
@@ -2308,7 +2294,6 @@ export const AppContainer = (props: AppContainerProps) => {
   const shouldShowStickyTodos =
     stickyTodos !== null &&
     !dialogsVisible &&
-    !isFeedbackDialogOpen &&
     streamingState !== StreamingState.WaitingForConfirmation;
   const stickyTodoWidth = Math.min(mainAreaWidth, 64);
   const stickyTodoMaxVisibleItems =
@@ -3300,8 +3285,6 @@ export const AppContainer = (props: AppContainerProps) => {
       isMcpDialogOpen,
       // Hooks dialog
       isHooksDialogOpen,
-      // Feedback dialog
-      isFeedbackDialogOpen,
       // Per-task token tracking
       taskStartTokens,
       // Real-time token display
@@ -3425,8 +3408,6 @@ export const AppContainer = (props: AppContainerProps) => {
       isMcpDialogOpen,
       // Hooks dialog
       isHooksDialogOpen,
-      // Feedback dialog
-      isFeedbackDialogOpen,
       // Per-task token tracking
       taskStartTokens,
       // Real-time token display
@@ -3513,11 +3494,6 @@ export const AppContainer = (props: AppContainerProps) => {
       openHelpDialog,
       closeHelpDialog,
       setHelpTab,
-      // Feedback dialog
-      openFeedbackDialog,
-      closeFeedbackDialog,
-      temporaryCloseFeedbackDialog,
-      submitFeedback,
       // Rewind selector
       openRewindSelector,
       closeRewindSelector,
@@ -3589,11 +3565,6 @@ export const AppContainer = (props: AppContainerProps) => {
       openHelpDialog,
       closeHelpDialog,
       setHelpTab,
-      // Feedback dialog
-      openFeedbackDialog,
-      closeFeedbackDialog,
-      temporaryCloseFeedbackDialog,
-      submitFeedback,
       // Rewind selector
       openRewindSelector,
       closeRewindSelector,

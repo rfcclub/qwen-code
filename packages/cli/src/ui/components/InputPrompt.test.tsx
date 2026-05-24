@@ -49,12 +49,11 @@ vi.mock('../hooks/useInputHistory.js');
 vi.mock('../hooks/useReverseSearchCompletion.js');
 vi.mock('../utils/clipboardUtils.js');
 vi.mock('../contexts/UIStateContext.js', () => ({
-  useUIState: vi.fn(() => ({ isFeedbackDialogOpen: false, messageQueue: [] })),
+  useUIState: vi.fn(() => ({ messageQueue: [] })),
 }));
 vi.mock('../contexts/UIActionsContext.js', () => ({
   useUIActions: vi.fn(() => ({
     handleRetryLastPrompt: vi.fn(),
-    temporaryCloseFeedbackDialog: vi.fn(),
     popAllQueuedMessages: vi.fn(() => null),
   })),
 }));
@@ -182,13 +181,11 @@ describe('InputPrompt', () => {
     mockViewActions.setBgPillFocused.mockReset();
 
     mockedUseUIState.mockReturnValue({
-      isFeedbackDialogOpen: false,
       messageQueue: [],
       pendingGeminiHistoryItems: [],
     } as unknown as ReturnType<typeof useUIState>);
     mockedUseUIActions.mockReturnValue({
       handleRetryLastPrompt: vi.fn(),
-      temporaryCloseFeedbackDialog: vi.fn(),
       popAllQueuedMessages: vi.fn(() => null),
     } as unknown as ReturnType<typeof useUIActions>);
     mockedUseAgentViewState.mockReturnValue({
@@ -3802,14 +3799,12 @@ describe('InputPrompt', () => {
   describe('Ctrl+Y retry shortcut', () => {
     let mockUIActions: {
       handleRetryLastPrompt: ReturnType<typeof vi.fn>;
-      temporaryCloseFeedbackDialog: ReturnType<typeof vi.fn>;
       popAllQueuedMessages: ReturnType<typeof vi.fn>;
     };
 
     beforeEach(() => {
       mockUIActions = {
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: vi.fn(() => null),
       };
 
@@ -3892,45 +3887,16 @@ describe('InputPrompt', () => {
 
       unmount();
     });
-
-    /**
-     * When feedback dialog is open, Ctrl+Y should be passed through after
-     * temporarily closing the dialog.
-     */
-    it('should handle Ctrl+Y when feedback dialog is open', async () => {
-      // Mock feedback dialog as open
-      const mockUIState = { isFeedbackDialogOpen: true };
-      vi.doMock('../contexts/UIStateContext.js', () => ({
-        useUIState: vi.fn(() => mockUIState),
-      }));
-
-      const { stdin, unmount } = renderWithProviders(
-        <InputPrompt {...props} />,
-      );
-      await wait();
-
-      // Send Ctrl+Y
-      stdin.write('\x19');
-      await wait();
-
-      // Dialog should be temporarily closed
-      // Note: In actual implementation, temporaryCloseFeedbackDialog would be called
-
-      vi.doUnmock('../contexts/UIStateContext.js');
-      unmount();
-    });
   });
 
   describe('queue input editing', () => {
     afterEach(() => {
       // Restore default mocks
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: [],
       } as unknown as ReturnType<typeof useUIState>);
       vi.mocked(useUIActions).mockReturnValue({
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: vi.fn(() => null),
       } as unknown as ReturnType<typeof useUIActions>);
     });
@@ -3938,12 +3904,10 @@ describe('InputPrompt', () => {
     it('should pop queued messages into input on Up arrow when queue is non-empty', async () => {
       const mockPopAll = vi.fn(() => 'queued msg 1\n\nqueued msg 2');
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: ['queued msg 1', 'queued msg 2'],
       } as unknown as ReturnType<typeof useUIState>);
       vi.mocked(useUIActions).mockReturnValue({
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: mockPopAll,
       } as unknown as ReturnType<typeof useUIActions>);
 
@@ -3965,12 +3929,10 @@ describe('InputPrompt', () => {
     it('should prepend queued messages before existing input text', async () => {
       const mockPopAll = vi.fn(() => 'queued msg');
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: ['queued msg'],
       } as unknown as ReturnType<typeof useUIState>);
       vi.mocked(useUIActions).mockReturnValue({
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: mockPopAll,
       } as unknown as ReturnType<typeof useUIActions>);
 
@@ -3998,12 +3960,10 @@ describe('InputPrompt', () => {
     it('should pop queued messages on ESC when queue is non-empty', async () => {
       const mockPopAll = vi.fn(() => 'queued msg');
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: ['queued msg'],
       } as unknown as ReturnType<typeof useUIState>);
       vi.mocked(useUIActions).mockReturnValue({
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: mockPopAll,
       } as unknown as ReturnType<typeof useUIActions>);
 
@@ -4025,12 +3985,10 @@ describe('InputPrompt', () => {
       // already drained by another pop/drain — popAllQueuedMessages returns null.
       const mockPopAll = vi.fn(() => null);
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: ['stale msg'],
       } as unknown as ReturnType<typeof useUIState>);
       vi.mocked(useUIActions).mockReturnValue({
         handleRetryLastPrompt: vi.fn(),
-        temporaryCloseFeedbackDialog: vi.fn(),
         popAllQueuedMessages: mockPopAll,
       } as unknown as ReturnType<typeof useUIActions>);
 
@@ -4063,7 +4021,6 @@ describe('InputPrompt', () => {
 
     it('should not intercept Ctrl+P when queue is non-empty', async () => {
       vi.mocked(useUIState).mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: ['queued msg'],
       } as unknown as ReturnType<typeof useUIState>);
 
@@ -4152,7 +4109,6 @@ describe('InputPrompt', () => {
 
     it('Ctrl+P/N and arrows do not change input history while a tool confirmation owns navigation', async () => {
       mockedUseUIState.mockReturnValue({
-        isFeedbackDialogOpen: false,
         messageQueue: [],
         pendingGeminiHistoryItems: [
           {

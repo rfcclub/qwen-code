@@ -343,13 +343,6 @@ export default {
   'Show Citations': 'Quellenangaben anzeigen',
   'Custom Witty Phrases': 'Benutzerdefinierte Witzige Sprüche',
   'Show Welcome Back Dialog': 'Willkommen-zurück-Dialog anzeigen',
-  'Enable User Feedback': 'Benutzerfeedback aktivieren',
-  'How is Qwen doing this session? (optional)':
-    'Wie macht sich Qwen in dieser Sitzung? (optional)',
-  Bad: 'Schlecht',
-  Fine: 'In Ordnung',
-  Good: 'Gut',
-  Dismiss: 'Ignorieren',
   'Screen Reader Mode': 'Bildschirmleser-Modus',
   'Max Session Turns': 'Maximale Sitzungsrunden',
   'Skip Next Speaker Check': 'Nächste-Sprecher-Prüfung überspringen',

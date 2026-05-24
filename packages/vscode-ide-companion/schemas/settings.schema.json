@@ -250,11 +250,6 @@
           "type": "boolean",
           "default": true
         },
-        "enableUserFeedback": {
-          "description": "Show optional feedback dialog after conversations to help improve Qwen performance.",
-          "type": "boolean",
-          "default": true
-        },
         "enableFollowupSuggestions": {
           "description": "Show context-aware follow-up suggestions after task completion. Press Tab or Right Arrow to accept, Enter to accept and submit.",
           "type": "boolean",
@@ -284,11 +279,6 @@
               "type": "boolean"
             }
           }
-        },
-        "feedbackLastShownTimestamp": {
-          "description": "The last time the feedback dialog was shown.",
-          "type": "number",
-          "default": 0
         },
         "compactMode": {
           "description": "Hide tool output and thinking for a cleaner view (toggle with Ctrl+O).",

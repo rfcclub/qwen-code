@@ -752,16 +752,6 @@ const SETTINGS_SCHEMA = {
           'Show welcome back dialog when returning to a project with conversation history. Choosing "Start new chat session" suppresses the dialog for that project until the project summary changes.',
         showInDialog: true,
       },
-      enableUserFeedback: {
-        type: 'boolean',
-        label: 'Enable User Feedback',
-        category: 'UI',
-        requiresRestart: false,
-        default: true,
-        description:
-          'Show optional feedback dialog after conversations to help improve Qwen performance.',
-        showInDialog: true,
-      },
       enableFollowupSuggestions: {
         type: 'boolean',
         label: 'Enable Follow-up Suggestions',
@@ -821,15 +811,6 @@ const SETTINGS_SCHEMA = {
             showInDialog: false,
           },
         },
-      },
-      feedbackLastShownTimestamp: {
-        type: 'number',
-        label: 'Feedback Last Shown Timestamp',
-        category: 'UI',
-        requiresRestart: false,
-        default: 0,
-        description: 'The last time the feedback dialog was shown.',
-        showInDialog: false,
       },
       compactMode: {
         type: 'boolean',

@@ -164,8 +164,6 @@ export interface UIState {
   isMcpDialogOpen: boolean;
   // Hooks dialog
   isHooksDialogOpen: boolean;
-  // Feedback dialog
-  isFeedbackDialogOpen: boolean;
   // Per-task token tracking
   taskStartTokens: number;
   // Real-time token display: ref to streaming output char length (polled, not state)

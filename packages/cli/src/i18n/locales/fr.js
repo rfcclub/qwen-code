@@ -416,13 +416,6 @@ export default {
   'Show Citations': 'Afficher les citations',
   'Custom Witty Phrases': 'Phrases personnalisées spirituelles',
   'Show Welcome Back Dialog': 'Afficher le dialogue de bienvenue',
-  'Enable User Feedback': 'Activer les retours utilisateur',
-  'How is Qwen doing this session? (optional)':
-    'Comment se passe cette session avec Qwen ? (facultatif)',
-  Bad: 'Mauvais',
-  Fine: 'Correct',
-  Good: 'Bien',
-  Dismiss: 'Ignorer',
   'Screen Reader Mode': "Mode lecteur d'écran",
   'Max Session Turns': 'Nombre maximum de tours de session',
   'Skip Next Speaker Check':

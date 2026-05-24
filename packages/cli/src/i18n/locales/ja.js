@@ -1329,9 +1329,6 @@ export default {
   'Language: Model': '言語: モデル',
   'Show Line Numbers in Code': 'コードの行番号を表示',
   'Show Welcome Back Dialog': 'おかえりダイアログを表示',
-  'Enable User Feedback': 'ユーザーフィードバックを有効化',
-  'How is Qwen doing this session? (optional)':
-    'このセッションでの Qwen の調子はどうですか？（任意）',
   'Interactive Shell (PTY)': '対話型シェル (PTY)',
   'Select Editor': 'エディタを選択',
   'Editor Preference': 'エディタ設定',
@@ -1456,10 +1453,6 @@ export default {
   "Use '/extensions install' to install your first extension.":
     "'/extensions install' を使って最初の拡張機能をインストールしてください。",
   Theme: 'テーマ',
-  Bad: '悪い',
-  Fine: '普通',
-  Good: '良い',
-  Dismiss: '閉じる',
   'No extensions installed.': 'インストールされた拡張機能はありません。',
   'Extension "{{name}}" not found.': '拡張機能 "{{name}}" が見つかりません。',
   'No extensions to update.': '更新する拡張機能はありません。',

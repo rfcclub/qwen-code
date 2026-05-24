@@ -172,7 +172,6 @@ const createUIState = (overrides: Partial<UIState> = {}): UIState =>
     isExtensionsManagerDialogOpen: false,
     isMcpDialogOpen: false,
     isHooksDialogOpen: false,
-    isFeedbackDialogOpen: false,
     taskStartTokens: 0,
     streamingResponseLengthRef: { current: 0 },
     isReceivingContent: false,
