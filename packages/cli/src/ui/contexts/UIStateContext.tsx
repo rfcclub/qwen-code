@@ -197,8 +197,6 @@ export interface UIState {
   // Hooks dialog
   isHooksDialogOpen: boolean;
   isStatsDialogOpen: boolean;
-  // Feedback dialog
-  isFeedbackDialogOpen: boolean;
   // Per-task token tracking
   taskStartTokens: number;
   taskStartStreamingChars: number;

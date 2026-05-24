@@ -329,11 +329,6 @@
           "type": "boolean",
           "default": true
         },
-        "enableUserFeedback": {
-          "description": "Show optional feedback dialog after conversations to help improve Qwen performance.",
-          "type": "boolean",
-          "default": true
-        },
         "enableFollowupSuggestions": {
           "description": "Show context-aware follow-up suggestions after task completion. Press Tab, Right Arrow, or Enter to accept into the input buffer.",
           "type": "boolean",
@@ -363,11 +358,6 @@
               "type": "boolean"
             }
           }
-        },
-        "feedbackLastShownTimestamp": {
-          "description": "The last time the feedback dialog was shown.",
-          "type": "number",
-          "default": 0
         },
         "compactMode": {
           "description": "Compact view (web shell only; not used by the TUI).",

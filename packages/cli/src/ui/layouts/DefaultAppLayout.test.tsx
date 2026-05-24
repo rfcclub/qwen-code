@@ -77,7 +77,6 @@ const mockUIActions = {
 
 const baseUIState: Partial<UIState> = {
   dialogsVisible: false,
-  isFeedbackDialogOpen: false,
   mainControlsRef: { current: null },
   mainAreaWidth: 80,
   terminalWidth: 80,
@@ -227,23 +226,6 @@ describe('DefaultAppLayout', () => {
     expect(output).not.toContain('StickyTodoList');
     expect(output).toContain('Composer');
   });
-
-  it('does not render sticky todo list when feedback dialog is open', () => {
-    mockedUseAgentViewState.mockReturnValue({
-      activeView: 'main',
-      agents: new Map(),
-    });
-
-    const { lastFrame } = renderLayout({
-      ...baseUIState,
-      isFeedbackDialogOpen: true,
-    });
-
-    const output = lastFrame() ?? '';
-    expect(output).not.toContain('StickyTodoList');
-    expect(output).toContain('Composer');
-  });
-
   it('does not render sticky todo list in an agent tab view', () => {
     mockedUseAgentViewState.mockReturnValue({
       activeView: 'agent-1',

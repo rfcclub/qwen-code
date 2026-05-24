@@ -46,7 +46,6 @@ export const DefaultAppLayout: React.FC = () => {
   const shouldShowStickyTodos =
     uiState.stickyTodos !== null &&
     !uiState.dialogsVisible &&
-    !uiState.isFeedbackDialogOpen &&
     uiState.streamingState === StreamingState.Responding;
 
   // Clear terminal on view switch so previous view's <Static> output

@@ -34,7 +34,6 @@ export const ScreenReaderAppLayout: React.FC = () => {
   const shouldShowStickyTodos =
     uiState.stickyTodos !== null &&
     !uiState.dialogsVisible &&
-    !uiState.isFeedbackDialogOpen &&
     uiState.streamingState === StreamingState.Responding;
 
   return (

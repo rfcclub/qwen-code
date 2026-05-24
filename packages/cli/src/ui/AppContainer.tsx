@@ -119,7 +119,6 @@ import { useHistory } from './hooks/useHistoryManager.js';
 import { useMemoryMonitor } from './hooks/useMemoryMonitor.js';
 import { useResizeSettleRepaint } from './hooks/useResizeSettleRepaint.js';
 import { useThemeCommand } from './hooks/useThemeCommand.js';
-import { useFeedbackDialog } from './hooks/useFeedbackDialog.js';
 import { useAuthCommand } from './auth/useAuth.js';
 import { useEditorSettings } from './hooks/useEditorSettings.js';
 import { usePreferredEditor } from './hooks/usePreferredEditor.js';
@@ -2908,19 +2907,6 @@ export const AppContainer = (props: AppContainerProps) => {
     needsRestart: ideNeedsRestart,
     restartReason: ideTrustRestartReason,
   } = useIdeTrustListener();
-  const {
-    isFeedbackDialogOpen,
-    openFeedbackDialog,
-    closeFeedbackDialog,
-    temporaryCloseFeedbackDialog,
-    submitFeedback,
-  } = useFeedbackDialog({
-    config,
-    settings,
-    streamingState,
-    history: historyManager.history,
-    sessionStats,
-  });
   const dialogsVisible =
     showWelcomeBackDialog ||
     shouldShowIdePrompt ||
@@ -2989,7 +2975,6 @@ export const AppContainer = (props: AppContainerProps) => {
   const shouldShowStickyTodos =
     stickyTodos !== null &&
     !dialogsVisible &&
-    !isFeedbackDialogOpen &&
     streamingState === StreamingState.Responding;
   const stickyTodoWidth = Math.min(mainAreaWidth, 64);
   const stickyTodoMaxVisibleItems = getStickyTodoMaxVisibleItemsForMode(
@@ -4149,8 +4134,6 @@ export const AppContainer = (props: AppContainerProps) => {
       // Hooks dialog
       isHooksDialogOpen,
       isStatsDialogOpen,
-      // Feedback dialog
-      isFeedbackDialogOpen,
       // Per-task token tracking
       taskStartTokens,
       taskStartStreamingChars,
@@ -4293,8 +4276,6 @@ export const AppContainer = (props: AppContainerProps) => {
       // Hooks dialog
       isHooksDialogOpen,
       isStatsDialogOpen,
-      // Feedback dialog
-      isFeedbackDialogOpen,
       // Per-task token tracking
       taskStartTokens,
       taskStartStreamingChars,
@@ -4395,11 +4376,6 @@ export const AppContainer = (props: AppContainerProps) => {
       openHelpDialog,
       closeHelpDialog,
       setHelpTab,
-      // Feedback dialog
-      openFeedbackDialog,
-      closeFeedbackDialog,
-      temporaryCloseFeedbackDialog,
-      submitFeedback,
       // Rewind selector
       openRewindSelector,
       closeRewindSelector,
@@ -4483,11 +4459,6 @@ export const AppContainer = (props: AppContainerProps) => {
       openHelpDialog,
       closeHelpDialog,
       setHelpTab,
-      // Feedback dialog
-      openFeedbackDialog,
-      closeFeedbackDialog,
-      temporaryCloseFeedbackDialog,
-      submitFeedback,
       // Rewind selector
       openRewindSelector,
       closeRewindSelector,

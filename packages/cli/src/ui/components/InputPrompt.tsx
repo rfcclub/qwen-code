@@ -64,7 +64,6 @@ import {
   getLiveAgentPanelVpMaxRows,
 } from './background-view/liveAgentPanelVisibility.js';
 import { panelDisplayOrder } from './background-view/agent-forest.js';
-import { FEEDBACK_DIALOG_KEYS } from '../FeedbackDialog.js';
 import { BaseTextInput } from './BaseTextInput.js';
 import type { RenderLineOptions } from './BaseTextInput.js';
 import { getApprovalModePromptStyle } from './approvalModeVisuals.js';
@@ -1086,7 +1085,6 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
       ) {
         return true;
       }
-
       // Helper: pop all queued messages into the input buffer,
       // preserving cursor position relative to existing text.
       const popQueueIntoInput = (): boolean => {
