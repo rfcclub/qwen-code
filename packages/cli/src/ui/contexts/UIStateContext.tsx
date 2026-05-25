@@ -191,5 +191,7 @@ export const useUIState = () => {
   if (!context) {
     throw new Error('useUIState must be used within a UIStateProvider');
   }
-  return context;
+  // Cache in ref to prevent re-creating the object on every render
+  // This fixes the flickering caused by constant state recreation
+  return (context ?? null) as UIState;
 };
