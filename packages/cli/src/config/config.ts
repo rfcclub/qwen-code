@@ -129,6 +129,8 @@ export interface CliArgs {
   promptInteractive: string | undefined;
   systemPrompt: string | undefined;
   appendSystemPrompt: string | undefined;
+  initPrompt: string[] | undefined;
+  profile: string | undefined;
   yolo: boolean | undefined;
   bare: boolean | undefined;
   approvalMode: string | undefined;
@@ -643,6 +645,19 @@ export async function parseArguments(): Promise<CliArgs> {
           type: 'string',
           description:
             'Append instructions to the main session system prompt for this run. Can be combined with --system-prompt.',
+        })
+        .option('init-prompt', {
+          type: 'array',
+          string: true,
+          description:
+            'Add a file to the global init prompts (repeatable). Content is appended to the system prompt alongside globalInitPrompts from settings.',
+          coerce: (paths: string[]) =>
+            paths.flatMap((p) => p.split(',').map((s) => s.trim())),
+        })
+        .option('profile', {
+          type: 'string',
+          description:
+            'Load an identity profile from ~/.qwen-lyra/profiles/<name>.json',
         })
         .option('sandbox', {
           alias: 's',
@@ -1745,6 +1760,11 @@ export async function loadCliConfig(
       ? includeDirectories.length > 0
       : (settings.context?.loadFromIncludeDirectories ?? false),
     globalInitPrompts: settings.context?.globalInitPrompts,
+    initPromptsFromEnv: process.env['QWEN_LYRA_INIT_PROMPTS']
+      ? process.env['QWEN_LYRA_INIT_PROMPTS'].split(':').filter(Boolean)
+      : undefined,
+    initPromptsFromCli: argv.initPrompt,
+    profileName: argv.profile || process.env['QWEN_LYRA_PROFILE'] || undefined,
     importFormat: settings.context?.importFormat || 'tree',
     debugMode,
     question,

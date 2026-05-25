@@ -634,11 +634,17 @@ export class GeminiClient {
     const userMemory = this.config.getUserMemory();
     const overrideSystemPrompt = this.config.getSystemPrompt();
     const appendSystemPrompt = this.config.getAppendSystemPrompt();
+    const profileAppendSystemPrompt =
+      this.config.getProfileAppendSystemPrompt();
     const globalInitPrompts = this.config.getGlobalInitPrompts();
     const gitStatus = this.getCachedGitStatus();
 
-    // Merge global init prompts with append system prompt
-    const combinedAppend = [appendSystemPrompt, globalInitPrompts]
+    // Merge profile append, global init prompts, and settings append
+    const combinedAppend = [
+      profileAppendSystemPrompt,
+      appendSystemPrompt,
+      globalInitPrompts,
+    ]
       .filter(Boolean)
       .join('\n\n');
 

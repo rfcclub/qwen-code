@@ -687,6 +687,9 @@ export interface ConfigParameters {
   cliVersion?: string;
   loadMemoryFromIncludeDirectories?: boolean;
   globalInitPrompts?: string[];
+  initPromptsFromEnv?: string[];
+  initPromptsFromCli?: string[];
+  profileName?: string;
   importFormat?: 'tree' | 'flat';
   chatRecording?: boolean;
   chatCompression?: ChatCompressionSettings;
@@ -988,7 +991,12 @@ export class Config {
   private readonly chatRecordingEnabled: boolean;
   private readonly loadMemoryFromIncludeDirectories: boolean = false;
   private readonly globalInitPrompts: string[];
+  private readonly initPromptsFromEnv: string[];
+  private readonly initPromptsFromCli: string[];
+  private readonly profileName: string | undefined;
+  private readonly profileAppendSystemPrompt: string | undefined;
   private globalInitPromptsContent: string | undefined;
+  private globalInitPromptMtimes: number[] | undefined;
   private readonly importFormat: 'tree' | 'flat';
   private readonly chatCompression: ChatCompressionSettings | undefined;
   private readonly interactive: boolean;
@@ -1172,6 +1180,22 @@ export class Config {
     this.loadMemoryFromIncludeDirectories =
       params.loadMemoryFromIncludeDirectories ?? false;
     this.globalInitPrompts = params.globalInitPrompts ?? [];
+    this.initPromptsFromEnv = params.initPromptsFromEnv ?? [];
+    this.initPromptsFromCli = params.initPromptsFromCli ?? [];
+
+    // Load identity profile if specified
+    this.profileName = params.profileName;
+    if (this.profileName) {
+      const profile = this.loadProfile(this.profileName);
+      // Profile globalInitPrompts are prepended (higher priority than settings)
+      this.globalInitPrompts = [
+        ...profile.globalInitPrompts,
+        ...this.globalInitPrompts,
+      ];
+      this.profileAppendSystemPrompt = profile.appendSystemPrompt;
+    } else {
+      this.profileAppendSystemPrompt = undefined;
+    }
     this.importFormat = params.importFormat ?? 'tree';
     // Auto-compaction threshold moved to built-in constants (computeThresholds
     // in chatCompressionService.ts). The old `contextPercentageThreshold`
@@ -2060,13 +2084,72 @@ export class Config {
     return this.importFormat;
   }
 
+  private loadProfile(profileName: string): {
+    globalInitPrompts: string[];
+    appendSystemPrompt: string | undefined;
+  } {
+    const profilePath = path.join(
+      homedir(),
+      '.qwen-lyra',
+      'profiles',
+      `${profileName}.json`,
+    );
+    try {
+      const content = fs.readFileSync(profilePath, 'utf8');
+      const profile = JSON.parse(content) as {
+        name?: string;
+        globalInitPrompts?: string[];
+        appendSystemPrompt?: string;
+      };
+      return {
+        globalInitPrompts: profile.globalInitPrompts ?? [],
+        appendSystemPrompt: profile.appendSystemPrompt,
+      };
+    } catch {
+      this.debugLogger.warn(
+        `Profile not found or unreadable: ${profileName} (${profilePath})`,
+      );
+      return { globalInitPrompts: [], appendSystemPrompt: undefined };
+    }
+  }
+
+  getProfileAppendSystemPrompt(): string | undefined {
+    return this.profileAppendSystemPrompt;
+  }
+
   getGlobalInitPrompts(): string {
-    if (this.globalInitPromptsContent !== undefined) {
-      return this.globalInitPromptsContent;
+    const allPaths = [
+      ...this.globalInitPrompts,
+      ...this.initPromptsFromEnv,
+      ...this.initPromptsFromCli,
+    ];
+
+    // Check mtimes for cache invalidation
+    const currentMtimes = allPaths.map((filePath) => {
+      try {
+        const resolved = filePath.startsWith('~')
+          ? path.join(homedir(), filePath.slice(1))
+          : filePath;
+        return fs.statSync(resolved).mtimeMs;
+      } catch {
+        return -1;
+      }
+    });
+
+    const cacheValid =
+      this.globalInitPromptsContent !== undefined &&
+      this.globalInitPromptMtimes !== undefined &&
+      currentMtimes.length === this.globalInitPromptMtimes.length &&
+      currentMtimes.every(
+        (mtime, i) => mtime === this.globalInitPromptMtimes![i],
+      );
+
+    if (cacheValid) {
+      return this.globalInitPromptsContent!;
     }
 
     const parts: string[] = [];
-    for (const filePath of this.globalInitPrompts) {
+    for (const filePath of allPaths) {
       try {
         const resolved = filePath.startsWith('~')
           ? path.join(homedir(), filePath.slice(1))
@@ -2083,6 +2166,7 @@ export class Config {
     }
 
     this.globalInitPromptsContent = parts.join('\n\n---\n\n');
+    this.globalInitPromptMtimes = currentMtimes;
     return this.globalInitPromptsContent;
   }
 
