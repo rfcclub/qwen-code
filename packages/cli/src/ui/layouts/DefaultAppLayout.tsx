@@ -5,7 +5,7 @@
  */
 
 import type React from 'react';
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Box } from 'ink';
 import { MainContent } from '../components/MainContent.js';
 import { DialogManager } from '../components/DialogManager.js';
@@ -26,7 +26,7 @@ import { StreamingState } from '../types.js';
 import { getStickyTodoMaxVisibleItemsForMode } from '../utils/todoSnapshot.js';
 import { getDialogMaxHeight } from '../utils/layoutUtils.js';
 
-export const DefaultAppLayout: React.FC = () => {
+const DefaultAppLayoutInner: React.FC = () => {
   const uiState = useUIState();
   const { refreshStatic } = useUIActions();
   const { activeView, agents } = useAgentViewState();
@@ -154,3 +154,5 @@ export const DefaultAppLayout: React.FC = () => {
     </Box>
   );
 };
+
+export const DefaultAppLayout = memo(DefaultAppLayoutInner);
