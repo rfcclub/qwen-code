@@ -382,24 +382,32 @@ export const MainContent = () => {
       <OverflowProvider>
         <Box flexDirection="column">
           {pendingHistoryItemsWithSourceCopyOffsets.map(
-            ({ item, sourceCopyIndexOffsets }, i) => (
-              <HistoryItemDisplay
-                key={i}
-                availableTerminalHeight={
-                  uiState.constrainHeight ? availableTerminalHeight : undefined
-                }
-                terminalWidth={terminalWidth}
-                mainAreaWidth={mainAreaWidth}
-                item={{ ...item, id: 0 }}
-                isPending={true}
-                isFocused={!uiState.isEditorDialogOpen}
-                activeShellPtyId={uiState.activePtyId}
-                embeddedShellFocused={uiState.embeddedShellFocused}
-                compactLabel={getCompactLabel(item)}
-                summaryAbsorbed={isSummaryAbsorbed(item)}
-                sourceCopyIndexOffsets={sourceCopyIndexOffsets}
-              />
-            ),
+            ({ item, sourceCopyIndexOffsets }, i) => {
+              // Stable key: type + text prefix + index. Prevents remounting
+              // of the same pending item across streaming ticks while
+              // keeping React reconciliation correct.
+              const key = `pending-${item.type}-${i}`;
+              return (
+                <HistoryItemDisplay
+                  key={key}
+                  availableTerminalHeight={
+                    uiState.constrainHeight
+                      ? availableTerminalHeight
+                      : undefined
+                  }
+                  terminalWidth={terminalWidth}
+                  mainAreaWidth={mainAreaWidth}
+                  item={{ ...item, id: 0 }}
+                  isPending={true}
+                  isFocused={!uiState.isEditorDialogOpen}
+                  activeShellPtyId={uiState.activePtyId}
+                  embeddedShellFocused={uiState.embeddedShellFocused}
+                  compactLabel={getCompactLabel(item)}
+                  summaryAbsorbed={isSummaryAbsorbed(item)}
+                  sourceCopyIndexOffsets={sourceCopyIndexOffsets}
+                />
+              );
+            },
           )}
           <ShowMoreLines constrainHeight={uiState.constrainHeight} />
         </Box>
