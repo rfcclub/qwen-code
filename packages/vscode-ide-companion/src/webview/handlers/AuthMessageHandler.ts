@@ -178,7 +178,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         label: string,
         providers: readonly ProviderConfig[],
       ) => {
-        if (providers.length === 0) return;
+        if (providers.length === 0) {
+          return;
+        }
         items.push({
           label,
           value: '',
@@ -211,7 +213,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         'Qwen Code: Select Provider',
         'Choose how to connect',
       );
-      if (!selectedId) return;
+      if (!selectedId) {
+        return;
+      }
 
       const provider = ALL_PROVIDERS.find((p) => p.id === selectedId);
       if (!provider) {
@@ -261,7 +265,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         `${flowTitle}: Protocol`,
         'Select API protocol',
       );
-      if (!selected) return;
+      if (!selected) {
+        return;
+      }
       protocol = selected as AuthType;
     }
 
@@ -280,7 +286,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
           `${flowTitle}: ${stepTitle}`,
           `Select ${stepTitle.toLowerCase()}`,
         );
-        if (!selected) return;
+        if (!selected) {
+          return;
+        }
         baseUrl = selected;
       } else {
         // Free-form URL input. Show a protocol-specific default as
@@ -300,7 +308,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
           placeHolder: placeholder,
           value: '',
         });
-        if (urlInput === undefined) return;
+        if (urlInput === undefined) {
+          return;
+        }
         baseUrl = urlInput.trim() || placeholder;
         if (!/^https?:\/\//i.test(baseUrl)) {
           // authError already clears the webview's connecting state; do NOT
@@ -329,13 +339,17 @@ export class AuthMessageHandler extends BaseMessageHandler {
       password: true,
       required: true,
     });
-    if (!apiKeyInput) return;
+    if (!apiKeyInput) {
+      return;
+    }
     // Trim before validation and persistence — a key pasted with trailing
     // whitespace would otherwise be stored as-is and cause silent auth
     // failures, and validateApiKey could reject in VS Code what the CLI
     // (which trims) accepts.
     const apiKey = apiKeyInput.trim();
-    if (!apiKey) return;
+    if (!apiKey) {
+      return;
+    }
 
     // Validate API key if provider has validation
     if (provider.validateApiKey) {
@@ -361,7 +375,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         value: defaults.join(','),
         required: true,
       });
-      if (!modelInput) return;
+      if (!modelInput) {
+        return;
+      }
       modelIds = modelInput
         .split(',')
         .map((id) => id.trim())
@@ -399,7 +415,9 @@ export class AuthMessageHandler extends BaseMessageHandler {
         `${flowTitle}: Advanced Config`,
         'Enable thinking mode?',
       );
-      if (!enableThinking) return;
+      if (!enableThinking) {
+        return;
+      }
       advancedConfig = {
         enableThinking: enableThinking === 'yes',
       };
