@@ -36,6 +36,8 @@ CLAUDE.md
 !.qwen/skills/**
 !.qwen/agents/
 !.qwen/agents/**
+!.qwen/design/
+!.qwen/design/**
 
 # OS metadata
 .DS_Store
