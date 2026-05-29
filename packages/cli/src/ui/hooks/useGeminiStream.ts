@@ -2173,6 +2173,12 @@ export const useGeminiStream = (
           toolCall.request.name,
           toolCall.request.args as Record<string, unknown>,
         );
+
+        // Feed tool results to small-model middleware for trust scoring.
+        const success = toolCall.status === 'success';
+        geminiClient
+          ?.getSmallModelMiddleware()
+          ?.recordToolResult(toolCall.request.name, success);
       }
 
       if (geminiTools.length === 0) {

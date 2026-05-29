@@ -94,6 +94,7 @@ import {
   flatMapTextParts,
   prependToFirstTextPart,
 } from '../utils/partUtils.js';
+import { SmallModelMiddleware } from '../small-model/index.js';
 import { promptIdContext } from '../utils/promptIdContext.js';
 import { retryWithBackoff, isUnattendedMode } from '../utils/retry.js';
 import { escapeSystemReminderTags } from '../utils/xml.js';
@@ -202,6 +203,12 @@ export class GeminiClient {
   private pendingMemoryTaskPromises: Array<Promise<number>> = [];
 
   /**
+   * Lazy-initialized small-model optimization middleware.
+   * Active when config.getSmallModelOptimizationEnabled() is true.
+   */
+  private smallModelMiddleware: SmallModelMiddleware | null = null;
+
+  /**
    * Timestamp (epoch ms) of the last completed API call.
    * Used to detect idle periods for thinking block cleanup.
    * Starts as null — on the first query there is no prior thinking to clean,
@@ -290,6 +297,14 @@ export class GeminiClient {
       throw new Error('Chat not initialized');
     }
     return this.chat;
+  }
+
+  /**
+   * Returns the small-model optimization middleware, if active.
+   * The CLI layer uses this to report tool results for trust scoring.
+   */
+  getSmallModelMiddleware(): SmallModelMiddleware | null {
+    return this.ensureSmallModelMiddleware();
   }
 
   isInitialized(): boolean {
@@ -773,6 +788,17 @@ export class GeminiClient {
       this.config.getDebugLogger().warn(`SessionStart hook failed: ${err}`);
       return undefined;
     }
+  }
+
+  /**
+   * Lazy-initialize and return the small-model optimization middleware.
+   * Returns null if the feature is disabled via config or CLI flag.
+   */
+  private ensureSmallModelMiddleware(): SmallModelMiddleware | null {
+    if (!this.config.getSmallModelOptimizationEnabled()) return null;
+    if (this.smallModelMiddleware) return this.smallModelMiddleware;
+    this.smallModelMiddleware = new SmallModelMiddleware(128_000, []);
+    return this.smallModelMiddleware;
   }
 
   async startChat(
@@ -1712,6 +1738,18 @@ export class GeminiClient {
           value: nextActiveGoal ?? null,
         };
       };
+
+      // ── Small-Model Optimization: pre-request hook ──────────────
+      const middleware = this.ensureSmallModelMiddleware();
+      if (middleware && middleware.config.enableTodoPlanning) {
+        const todoContext = middleware.plan.getTodoContext();
+        if (todoContext) {
+          // Prepend as a system reminder — requestToSend is (string | Part)[]
+          // with system-reminder strings at the front.
+          requestToSend = [todoContext, ...requestToSend];
+        }
+      }
+      // ─────────────────────────────────────────────────────────────
 
       const resultStream = turn.run(model, requestToSend, signal);
       let didUpdateIdeContextState = false;

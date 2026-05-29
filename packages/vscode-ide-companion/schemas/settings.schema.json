@@ -97,6 +97,11 @@
             }
           }
         },
+        "smallModelOptimization": {
+          "description": "Enable compensating infrastructure for small models (<32K context or <35B parameters). Auto-detects model capabilities. Disable for frontier models.",
+          "type": "boolean",
+          "default": true
+        },
         "debugKeystrokeLogging": {
           "description": "Enable debug logging of keystrokes to the console.",
           "type": "boolean",

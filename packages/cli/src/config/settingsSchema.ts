@@ -460,6 +460,17 @@ const SETTINGS_SCHEMA = {
           },
         },
       },
+      smallModelOptimization: {
+        type: 'boolean',
+        label: 'Small-Model Optimization',
+        category: 'General',
+        requiresRestart: false,
+        default: true,
+        description:
+          'Enable compensating infrastructure for small models (<32K context or <35B parameters). ' +
+          'Auto-detects model capabilities. Disable for frontier models.',
+        showInDialog: false,
+      },
       debugKeystrokeLogging: {
         type: 'boolean',
         label: 'Debug Keystroke Logging',

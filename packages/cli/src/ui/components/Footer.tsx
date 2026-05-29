@@ -109,6 +109,12 @@ export const Footer: React.FC = () => {
       node: <Text color={theme.status.warning}>Debug Mode</Text>,
     });
   }
+  if (config.getSmallModelOptimizationEnabled()) {
+    rightItems.push({
+      key: 'small-model',
+      node: <Text color={theme.text.accent}>🐇 mode</Text>,
+    });
+  }
   // Dream tasks now surface via the BackgroundTasksPill (e.g. "1 dream")
   // alongside the other background-task kinds. The previous `✦ dreaming`
   // right-column indicator was removed to avoid two simultaneous signals
