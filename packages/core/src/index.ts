@@ -397,6 +397,13 @@ export type {
 } from './mcp/oauth-utils.js';
 export { hashMcpServerConfig } from './mcp/configHash.js';
 
+// MCP Registry
+export { MCPServerRegistry } from './mcp/registry.js';
+export type {
+  MCPRegistryServer,
+  MCPRegistryIndex,
+} from './mcp/registry-types.js';
+
 // ============================================================================
 // Telemetry
 // ============================================================================

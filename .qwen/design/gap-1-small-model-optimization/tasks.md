@@ -70,9 +70,9 @@
 
 ## 11. Tests
 
-- [ ] 11.1 Unit tests for TokenBudgetManager
-- [ ] 11.2 Unit tests for ForgivingToolParser
-- [ ] 11.3 Unit tests for PatchEngine
-- [ ] 11.4 Unit tests for ToolDeduplicator
-- [ ] 11.5 Unit tests for QualityMonitor
-- [ ] 11.6 Integration test: small-model optimization enabled for models <32K
+- [x] 11.1 Unit tests for TokenBudgetManager
+- [x] 11.2 Unit tests for ForgivingToolParser
+- [x] 11.3 Unit tests for PatchEngine
+- [x] 11.4 Unit tests for ToolDeduplicator
+- [x] 11.5 Unit tests for QualityMonitor
+- [x] 11.6 Integration test: small-model optimization enabled for models <32K
