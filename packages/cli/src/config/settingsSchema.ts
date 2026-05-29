@@ -549,6 +549,37 @@ const SETTINGS_SCHEMA = {
           },
         },
       },
+      checkpointing: {
+        type: 'object',
+        label: 'Checkpointing',
+        category: 'General',
+        requiresRestart: true,
+        default: {},
+        description: 'Session checkpointing settings.',
+        showInDialog: false,
+        properties: {
+          enabled: {
+            type: 'boolean',
+            label: 'Enable Checkpointing',
+            category: 'General',
+            requiresRestart: true,
+            default: false,
+            description: 'Enable session checkpointing for recovery',
+            showInDialog: false,
+          },
+        },
+      },
+      smallModelOptimization: {
+        type: 'boolean',
+        label: 'Small-Model Optimization',
+        category: 'General',
+        requiresRestart: false,
+        default: true,
+        description:
+          'Enable compensating infrastructure for small models (<32K context or <35B parameters). ' +
+          'Auto-detects model capabilities. Disable for frontier models.',
+        showInDialog: false,
+      },
       debugKeystrokeLogging: {
         type: 'boolean',
         label: 'Debug Keystroke Logging',

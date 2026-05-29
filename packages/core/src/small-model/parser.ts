@@ -82,15 +82,15 @@ export class ForgivingToolParser {
         .filter((t: unknown) => t && typeof t === 'object')
         .map((t: Record<string, unknown>) => ({
           name: String(
-            t.tool ??
-              t.name ??
-              (t.function as Record<string, unknown>)?.name ??
+            t['tool'] ??
+              t['name'] ??
+              (t['function'] as Record<string, unknown>)?.['name'] ??
               'unknown',
           ),
-          params: (t.params ??
-            t.parameters ??
-            t.arguments ??
-            (t.function as Record<string, unknown>)?.arguments ??
+          params: (t['params'] ??
+            t['parameters'] ??
+            t['arguments'] ??
+            (t['function'] as Record<string, unknown>)?.['arguments'] ??
             {}) as Record<string, unknown>,
           confidence: 1.0,
           raw: JSON.stringify(t),
@@ -127,15 +127,15 @@ export class ForgivingToolParser {
         .filter((t: unknown) => t && typeof t === 'object')
         .map((t: Record<string, unknown>) => ({
           name: String(
-            t.tool ??
-              t.name ??
-              (t.function as Record<string, unknown>)?.name ??
+            t['tool'] ??
+              t['name'] ??
+              (t['function'] as Record<string, unknown>)?.['name'] ??
               'unknown',
           ),
-          params: (t.params ??
-            t.parameters ??
-            t.arguments ??
-            (t.function as Record<string, unknown>)?.arguments ??
+          params: (t['params'] ??
+            t['parameters'] ??
+            t['arguments'] ??
+            (t['function'] as Record<string, unknown>)?.['arguments'] ??
             {}) as Record<string, unknown>,
           confidence: 0.8,
           raw: repaired,
