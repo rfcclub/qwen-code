@@ -6,7 +6,7 @@
 
 ---
 
-## Gaps
+## Phase 1 (Current)
 
 ### 1. Small-Model Optimization Layer [P1]
 
@@ -31,18 +31,6 @@
 
 ---
 
-### 2. Desktop App [P2]
-
-**Gap:** No GUI option. Only terminal TUI.
-
-**Competitor:** OpenCode (Electron), Codex (native app).
-
-**Why high:** Expands user base beyond terminal users.
-
-**Options:** Electron, Tauri, or reuse VS Code companion as GUI host.
-
----
-
 ### 3. Deepen MCP + LSP Integration [P1]
 
 **Gap:** MCP exists as a tool but not first-class lifecycle. LSP exists but not auto-discovered.
@@ -58,23 +46,11 @@
 
 ---
 
-### 4. Model Escalation Fallback [P2]
-
-**Gap:** No graceful degradation when local model fails.
-
-**Competitor:** SmallCode auto-fallback to Claude/OpenAI/DeepSeek.
-
-**Why high:** Bridges local-vs-cloud gap for users with mixed access.
-
----
-
 ### 5. Benchmark Harness [P1]
 
 **Gap:** No built-in way to measure model/agent performance.
 
 **Competitor:** SmallCode has smoke, polyglot-mini, tool-use suites.
-
-**Why critical:** Essential for open-source project with many model options. Prevents regression.
 
 **Components needed:**
 
@@ -92,8 +68,6 @@
 
 **Competitor:** OpenCode (plugins), Claw Code (hooks), SmallCode (lifecycle hooks).
 
-**Why critical:** Ecosystem growth requires third-party extensibility.
-
 **Components needed:**
 
 - Plugin manifest format
@@ -110,8 +84,6 @@
 
 **Competitor:** SmallCode evidence store captures "what was tried, what worked, what failed."
 
-**Why critical:** Reduces repeated mistakes across sessions. Builds institutional knowledge.
-
 **Components needed:**
 
 - Evidence capture per task
@@ -126,8 +98,6 @@
 **Gap:** Relies on full-file rewrites. Failed patches are hard errors.
 
 **Competitor:** SmallCode patch-first with merge fallback.
-
-**Why critical:** Safer for all model sizes. Reduces token usage.
 
 **Components needed:**
 
@@ -144,8 +114,6 @@
 
 **Competitor:** OpenCode has cost tracking.
 
-**Why high:** Important for API key users managing budgets.
-
 **Components needed:**
 
 - Token counting per request/response
@@ -161,8 +129,6 @@
 
 **Competitor:** OpenCode has parallel agents.
 
-**Why high:** Enables complex workflows requiring multiple agents.
-
 **Components needed:**
 
 - Session isolation (state, history, tools)
@@ -172,18 +138,18 @@
 
 ---
 
-## Priority Summary
+## Phase 2 (Future)
 
-| Priority      | Items            |
-| ------------- | ---------------- |
-| P1 (Critical) | 1, 3, 5, 6, 7, 8 |
-| P2 (High)     | 2, 4, 9, 10      |
-| P3 (Medium)   | —                |
+### 2. Desktop App [P2]
 
-**P1 rationale:** These 6 items form the "compensating infrastructure" that makes qwen-lyra viable for a broad model range. Without them, qwen-lyra remains a frontier-model-only tool.
+**Gap:** No GUI option. Only terminal TUI.
+**Platforms:** Windows (WSL), Linux, macOS.
+**Challenge:** Cross-platform compatibility (WSL vs native).
+**Status:** Deferred to Phase 2.
 
-**P2 rationale:** Desktop app and multi-session expand reach but require significant UI work. Model escalation and cost tracking are operational enhancements.
+### 4. Model Escalation Fallback [P2]
 
----
-
-_Next step: Design docs for P1 items._
+**Gap:** No graceful degradation when local model fails.
+**What it is:** When a small/local model (e.g. Qwen 7B) fails to solve a task or makes repeated errors, the system can optionally escalate the request to a stronger model (cloud API like Claude/GPT/Qwen-Max) for that specific task. The result is returned to the local flow. User can configure which models are fallback targets and the conditions for escalation (number of retries, task complexity score).
+**Competitor:** SmallCode auto-fallback to Claude/OpenAI/DeepSeek.
+**Status:** Deferred to Phase 2.
