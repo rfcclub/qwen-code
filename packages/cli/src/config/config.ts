@@ -170,6 +170,8 @@ export interface CliArgs {
   resume: string | undefined;
   /** Specify a session ID without session resumption */
   sessionId: string | undefined;
+  /** Disable small-model optimization (enabled by default for models <32K) */
+  noSmallModelOptimization: boolean | undefined;
   /**
    * Create a new forked session from the resumed session. Must be used with
    * --resume or --continue.
@@ -599,6 +601,12 @@ export async function parseArguments(): Promise<CliArgs> {
       type: 'boolean',
       description:
         'Minimal mode: skip implicit startup auto-discovery and only honor explicitly provided CLI inputs.',
+      default: false,
+    })
+    .option('no-small-model-optimization', {
+      type: 'boolean',
+      description:
+        'Disable small-model optimization layer. Normally auto-enabled for models with <32K context or <35B parameters. Use this flag to force frontier-model behavior.',
       default: false,
     })
     .option('proxy', {
@@ -1828,6 +1836,9 @@ export async function loadCliConfig(
     telemetry: telemetrySettings,
     outboundCorrelation: settings.outboundCorrelation,
     usageStatisticsEnabled: settings.privacy?.usageStatisticsEnabled ?? true,
+    smallModelOptimization: argv.noSmallModelOptimization
+      ? false
+      : (settings.general?.smallModelOptimization ?? true),
     clearContextOnIdle: settings.context?.clearContextOnIdle,
     fileFiltering: settings.context?.fileFiltering,
     checkpointing:

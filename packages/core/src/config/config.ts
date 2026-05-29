@@ -626,6 +626,11 @@ export interface ConfigParameters {
   gitCoAuthor?: GitCoAuthorParam;
   usageStatisticsEnabled?: boolean;
   /**
+   * Enable small-model optimization layer (compensating infrastructure
+   * for models <32K context or <35B parameters). Set to false to disable.
+   */
+  smallModelOptimization?: boolean;
+  /**
    * If true, disables the per-session FileReadCache short-circuit
    * (file_unchanged placeholder). Useful for sessions that may undergo
    * context compaction or transcript transformation, where the model
@@ -948,6 +953,7 @@ export class Config {
   private readonly outboundCorrelationSettings: OutboundCorrelationSettings;
   private readonly gitCoAuthor: GitCoAuthorSettings;
   private readonly usageStatisticsEnabled: boolean;
+  private readonly smallModelOptimization: boolean;
   private readonly fileReadCacheDisabled: boolean;
   private geminiClient!: GeminiClient;
   private baseLlmClient!: BaseLlmClient;
@@ -1134,6 +1140,7 @@ export class Config {
       email: 'qwen-coder@alibabacloud.com',
     };
     this.usageStatisticsEnabled = params.usageStatisticsEnabled ?? true;
+    this.smallModelOptimization = params.smallModelOptimization ?? true;
     this.fileReadCacheDisabled = params.fileReadCacheDisabled ?? false;
     this.outputLanguageFilePath = params.outputLanguageFilePath;
 
@@ -3253,6 +3260,10 @@ export class Config {
 
   getUsageStatisticsEnabled(): boolean {
     return this.usageStatisticsEnabled;
+  }
+
+  getSmallModelOptimizationEnabled(): boolean {
+    return this.smallModelOptimization;
   }
 
   getExtensionContextFilePaths(): string[] {
