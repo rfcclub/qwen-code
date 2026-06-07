@@ -10,6 +10,7 @@ import type {
   InputModalities,
 } from '../core/contentGenerator.js';
 import type { ConfigSources } from '../utils/configResolver.js';
+import type { EscalationTrigger } from './escalationErrors.js';
 
 /**
  * Model capabilities configuration
@@ -70,12 +71,21 @@ export interface ModelConfig {
 }
 
 /**
+ * Single step in a model escalation fallback chain.
+ */
+export interface EscalationStep {
+  /** Target model ID (or raw model string) */
+  model: string;
+  /** Optional authType override (defaults to current) */
+  authType?: AuthType;
+  /** Optional base URL override */
+  baseUrl?: string;
+  /** Which errors trigger this step (defaults to all) */
+  onErrors?: EscalationTrigger[];
+}
+
+/**
  * Model providers configuration grouped by provider id.
- *
- * The key is a provider identity. For built-in providers it equals an
- * {@link AuthType} value (e.g. `openai`, `gemini`); custom providers may use any
- * id (e.g. `idealab`) as long as a {@link ProviderProtocolConfig} entry maps it
- * to an SDK protocol.
  */
 export type ModelProvidersConfig = {
   [providerId: string]: ModelConfig[];
@@ -91,6 +101,16 @@ export type ModelProvidersConfig = {
 export type ProviderProtocolConfig = {
   [providerId: string]: string;
 };
+
+/** Global escalation chain configuration */
+export interface EscalationChainConfig {
+  /** Ordered list of fallback steps */
+  chain: EscalationStep[];
+  /** Maximum number of escalation steps per request (default: all) */
+  maxSteps?: number;
+  /** Whether to restore the original model after successful escalation (default: true) */
+  restoreOriginal?: boolean;
+}
 
 /**
  * Resolved model config with all defaults applied

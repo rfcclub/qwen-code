@@ -17,8 +17,10 @@ import {
 import { ToolDeduplicator } from './dedup.js';
 import { ReadGuard, ReadBeforeWriteGuard } from './read-guard.js';
 import { PatchEngine } from './patch.js';
+import { QualityEscalationError } from './escalation-error.js';
 
 export type { SmallModelConfig } from './types.js';
+export { QualityEscalationError } from './escalation-error.js';
 export { DEFAULT_SMALL_MODEL_CONFIG } from './types.js';
 export { TokenBudgetManager } from './budget.js';
 export { ForgivingToolParser } from './parser.js';
@@ -188,6 +190,16 @@ export class SmallModelMiddleware {
           .filter((i) => i.severity === 'error')
           .map((i) => i.message)
           .join('; ');
+
+        // Trigger model escalation if quality failures persist (gap-4)
+        const QUALITY_ESCALATION_THRESHOLD = 3;
+        if (this.attemptCount >= QUALITY_ESCALATION_THRESHOLD) {
+          throw new QualityEscalationError(
+            `Quality failures persisted after ${this.attemptCount} attempts: ${ctx.retryReason}`,
+            ctx.qualityIssues,
+            this.attemptCount,
+          );
+        }
       }
     }
 

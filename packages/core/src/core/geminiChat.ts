@@ -92,6 +92,7 @@ import {
   ApiRetryEvent,
   makeChatCompressionEvent,
 } from '../telemetry/types.js';
+import { EscalationManager } from '../models/escalationManager.js';
 import type { UiTelemetryService } from '../telemetry/uiTelemetry.js';
 import { type ChatCompressionInfo, CompressionStatus } from './turn.js';
 import { getContextLengthExceededInfo } from '../utils/contextLengthError.js';
@@ -2231,6 +2232,7 @@ export class GeminiChat {
         self.config,
         'Qwen Code is streaming a model response',
       );
+      let escalationManager: EscalationManager | undefined;
       try {
         // Surface a successful auto-compression to the caller as the first
         // event in the stream. Failed/skipped compaction attempts are silent.
@@ -2295,6 +2297,7 @@ export class GeminiChat {
           effectiveInitialMaxOutputTokens < escalatedLimit;
 
         let lastFinishReason: string | undefined;
+        escalationManager = new EscalationManager(self.config);
 
         for (;;) {
           let streamYieldedChunk = false;
@@ -2603,6 +2606,60 @@ export class GeminiChat {
               yield { type: StreamEventType.RETRY };
               await delay(delayMs, params.config?.abortSignal).promise;
               continue;
+            }
+            // Transient budget exhausted — stop immediately.
+            if (isTransientStreamError) {
+              break;
+            }
+
+            // Currently unreachable for `InvalidStreamError`. The
+            // `isContentError` predicate is identical to
+            // `isTransientStreamError` (`error instanceof InvalidStreamError`),
+            // and the transient branch above already either continued or
+            // broke for that class. The branch is preserved as
+            // defense-in-depth: a future error class that should consume
+            // its own content-retry budget but NOT the transient one
+            // could be threaded through here without re-deriving the
+            // popPartialIfPushed sequence. No reachable test path until
+            // the predicates diverge.
+            const isContentError = error instanceof InvalidStreamError;
+            if (isContentError) {
+              if (attempt < INVALID_CONTENT_RETRY_OPTIONS.maxAttempts - 1) {
+                popPartialIfPushed();
+                logContentRetry(
+                  self.config,
+                  new ContentRetryEvent(
+                    attempt,
+                    (error as InvalidStreamError).type,
+                    INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs,
+                    model,
+                  ),
+                );
+                await delay(
+                  INVALID_CONTENT_RETRY_OPTIONS.initialDelayMs * (attempt + 1),
+                  params.config?.abortSignal,
+                ).promise;
+                continue;
+              }
+            }
+            // Model escalation fallback (gap-4)
+            if (escalationManager.shouldEscalate(error)) {
+              const next = escalationManager.getNextStep();
+              if (next) {
+                popPartialIfPushed();
+                debugLogger.warn(
+                  `Escalating from ${model} to ${next.model} (step ${escalationManager.getCurrentStep() + 1})`,
+                );
+                const escalated = await escalationManager.escalate();
+                if (escalated) {
+                  model = next.model;
+                  // Reset retry counters for new model
+                  rateLimitRetryCount = 0;
+                  invalidStreamRetryCount = 0;
+                  attempt = -1;
+                  continue;
+                }
+              }
             }
             break;
           }
@@ -3202,6 +3259,10 @@ export class GeminiChat {
       } finally {
         sleepInhibitorHandle.release();
         streamDoneResolver!();
+        // Restore original model after escalation (gap-4)
+        if (escalationManager) {
+          await escalationManager.restoreOriginalModel();
+        }
         // Flush any deferred partial-tool_use record. Covers both the
         // post-retry-loop unretryable break AND the max-tokens
         // escalation throw (the escalated processStreamResponse can
