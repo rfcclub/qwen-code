@@ -6,12 +6,15 @@
 
 import { readFileSync, existsSync } from 'node:fs';
 
+export { ReadBeforeWriteGuard } from './write-guard.js';
+
 /**
  * Context-Aware Read Guard — returns intelligent content
  * within token budget rather than whole files.
  *
  * Uses head + tail strategy: shows the beginning and end of
  * large files with a summary of omitted content in between.
+ * Also preserves section markers when truncating.
  */
 export class ReadGuard {
   /**
@@ -22,46 +25,52 @@ export class ReadGuard {
     const content = readFileSync(filePath, 'utf-8');
     if (content.length <= budgetChars) return content;
 
+    return this.truncateWithSections(content, budgetChars);
+  }
+
+  /**
+   * Truncate content preserving section markers.
+   * Shows head + tail with omitted section noted in between.
+   */
+  private truncateWithSections(content: string, budgetChars: number): string {
     const headLen = Math.floor(budgetChars * 0.4);
     const tailLen = Math.floor(budgetChars * 0.4);
     const omitted = content.length - headLen - tailLen;
 
+    const head = content.slice(0, headLen);
+    const tail = content.slice(-tailLen);
+
+    // If there are section markers in the omitted region, preserve them
+    const omittedRegion = content.slice(headLen, content.length - tailLen);
+    const sectionMarkers = this.extractSectionMarkers(omittedRegion);
+
+    let sectionNote = '';
+    if (sectionMarkers.length > 0) {
+      sectionNote = `\n[Sections in omitted region: ${sectionMarkers.join(', ')}]\n`;
+    }
+
     return (
-      content.slice(0, headLen) +
-      `\n\n[... ${omitted.toLocaleString()} characters omitted for token budget ...]\n\n` +
-      content.slice(-tailLen)
+      head +
+      `\n\n[... ${omitted.toLocaleString()} characters omitted for token budget ...]\n` +
+      sectionNote +
+      `\n` +
+      tail
     );
   }
-}
-
-/**
- * Read-Before-Write Guard — prevents writing to files the model
- * hasn't read in the current session.
- */
-export class ReadBeforeWriteGuard {
-  private readFiles = new Set<string>();
-  private enabled: boolean;
-
-  constructor(enabled = true) {
-    this.enabled = enabled;
-  }
 
   /**
-   * Mark a file as read.
+   * Extract section headers from a region of text.
+   * Matches patterns like "# Section: X", "## Section X", etc.
    */
-  markRead(path: string): void {
-    this.readFiles.add(path);
-  }
-
-  /**
-   * Check if a file can be written to.
-   */
-  canWrite(path: string): { allowed: boolean; reason?: string } {
-    if (!this.enabled) return { allowed: true };
-    if (this.readFiles.has(path)) return { allowed: true };
-    return {
-      allowed: false,
-      reason: `Cannot edit ${path} without reading it first. Read the file to see its current content.`,
-    };
+  private extractSectionMarkers(text: string): string[] {
+    const regex = /^#+\s*Section[:\s]+(.+)$/gim;
+    const matches: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(text)) !== null) {
+      if (match[1]) {
+        matches.push(match[1].trim());
+      }
+    }
+    return matches;
   }
 }

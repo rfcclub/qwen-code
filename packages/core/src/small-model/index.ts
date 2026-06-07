@@ -32,6 +32,12 @@ export { ToolDeduplicator } from './dedup.js';
 export { ReadGuard, ReadBeforeWriteGuard } from './read-guard.js';
 export { PatchEngine } from './patch.js';
 
+// Gap-1 named file type exports (classes re-exported above)
+export type { TokenBudget } from './token-budget.js';
+export type { ParsedToolCall } from './tool-parser.js';
+export type { Patch, PatchResult } from './patch-engine.js';
+export type { Todo } from './todo-planner.js';
+
 /**
  * Pre-LLM request context injected by the middleware.
  */

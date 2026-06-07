@@ -11,6 +11,8 @@
 // Core configuration
 export * from './config/config.js';
 export { Storage } from './config/storage.js';
+export type { Profile } from './config/profile-types.js';
+export { ProfileManager } from './config/profile-types.js';
 
 // Permission system
 export * from './permissions/index.js';

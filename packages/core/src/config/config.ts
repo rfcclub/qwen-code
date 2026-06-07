@@ -189,6 +189,9 @@ import {
   type ChatRecordingFailureListener,
 } from '../services/chatRecordingService.js';
 import { CHARS_PER_TOKEN } from '../services/tokenEstimation.js';
+import { ProfileManager } from './profile-types.js';
+export { ProfileManager } from './profile-types.js';
+export type { Profile } from './profile-types.js';
 import {
   clearRuntimeStatus,
   writeRuntimeStatus,
@@ -3434,29 +3437,13 @@ export class Config {
     globalInitPrompts: string[];
     appendSystemPrompt: string | undefined;
   } {
-    const profilePath = path.join(
-      homedir(),
-      '.qwen-lyra',
-      'profiles',
-      `${profileName}.json`,
-    );
-    try {
-      const content = fs.readFileSync(profilePath, 'utf8');
-      const profile = JSON.parse(content) as {
-        name?: string;
-        globalInitPrompts?: string[];
-        appendSystemPrompt?: string;
-      };
-      return {
-        globalInitPrompts: profile.globalInitPrompts ?? [],
-        appendSystemPrompt: profile.appendSystemPrompt,
-      };
-    } catch {
-      this.debugLogger.warn(
-        `Profile not found or unreadable: ${profileName} (${profilePath})`,
-      );
-      return { globalInitPrompts: [], appendSystemPrompt: undefined };
-    }
+    const manager = new ProfileManager();
+    manager.createDefaultProfiles();
+    const profile = manager.load(profileName);
+    return {
+      globalInitPrompts: profile.globalInitPrompts ?? [],
+      appendSystemPrompt: profile.appendSystemPrompt,
+    };
   }
 
   getProfileAppendSystemPrompt(): string | undefined {
