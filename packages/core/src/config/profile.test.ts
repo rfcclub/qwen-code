@@ -14,7 +14,7 @@ vi.mock('node:os', async (importOriginal) => {
   const actual = await importOriginal<typeof import('node:os')>();
   return {
     ...actual,
-    homedir: vi.fn().mockReturnValue('/tmp/fake-home'),
+    homedir: vi.fn().mockReturnValue('/tmp/fake-home-profile'),
   };
 });
 
@@ -44,13 +44,15 @@ describe('ProfileManager', () => {
   let manager: ProfileManager;
 
   beforeEach(() => {
-    fs.mkdirSync('/tmp/fake-home', { recursive: true });
-    tmpDir = fs.mkdtempSync(path.join('/tmp/fake-home', 'qwen-profile-'));
+    fs.mkdirSync('/tmp/fake-home-profile', { recursive: true });
+    tmpDir = fs.mkdtempSync(
+      path.join('/tmp/fake-home-profile', 'qwen-profile-'),
+    );
     manager = new ProfileManager(tmpDir);
   });
 
   afterEach(() => {
-    fs.rmSync('/tmp/fake-home', { recursive: true, force: true });
+    fs.rmSync('/tmp/fake-home-profile', { recursive: true, force: true });
   });
 
   it('creates profiles directory if missing', () => {
@@ -144,14 +146,16 @@ describe('Config profile loading', () => {
   let profileDir: string;
 
   beforeEach(() => {
-    fs.mkdirSync('/tmp/fake-home', { recursive: true });
-    tmpDir = fs.mkdtempSync(path.join('/tmp/fake-home', 'qwen-config-'));
-    profileDir = path.join('/tmp/fake-home', '.qwen-lyra', 'profiles');
+    fs.mkdirSync('/tmp/fake-home-profile', { recursive: true });
+    tmpDir = fs.mkdtempSync(
+      path.join('/tmp/fake-home-profile', 'qwen-config-'),
+    );
+    profileDir = path.join('/tmp/fake-home-profile', '.qwen-lyra', 'profiles');
     fs.mkdirSync(profileDir, { recursive: true });
   });
 
   afterEach(() => {
-    fs.rmSync('/tmp/fake-home', { recursive: true, force: true });
+    fs.rmSync('/tmp/fake-home-profile', { recursive: true, force: true });
   });
 
   it('loads profile globalInitPrompts before settings globalInitPrompts', () => {

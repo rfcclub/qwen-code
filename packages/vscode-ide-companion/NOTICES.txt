@@ -198,6 +198,7 @@ This file contains third-party software notices and license terms.
 
 
 ============================================================
+
 @anthropic-ai/sdk@0.36.3
 (No repository found)
 
@@ -3319,6 +3320,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
 ============================================================
+
 @modelcontextprotocol/sdk@1.29.0
 (git+https://github.com/modelcontextprotocol/typescript-sdk.git)
 
