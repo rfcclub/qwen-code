@@ -1,5 +1,5 @@
 {
-  "name": "@qwen-code/qwen-code",
+  "name": "@qwen-code/qwen-lyra",
   "version": "0.20.0",
   "engines": {
     "node": ">=22.0.0"

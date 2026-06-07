@@ -18,6 +18,14 @@ vi.mock('node:fs', async (importOriginal) => {
   };
 });
 
+vi.mock('node:os', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:os')>();
+  return {
+    ...actual,
+    homedir: vi.fn().mockReturnValue('/tmp/fake-home'),
+  };
+});
+
 const baseParams = {
   cwd: '/tmp/qwen-test',
   targetDir: '/tmp/qwen-test',
@@ -43,11 +51,12 @@ describe('getGlobalInitPrompts merge order', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'qwen-init-'));
+    fs.mkdirSync('/tmp/fake-home', { recursive: true });
+    tmpDir = fs.mkdtempSync(path.join('/tmp/fake-home', 'qwen-init-'));
   });
 
   afterEach(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync('/tmp/fake-home', { recursive: true, force: true });
   });
 
   it('merges settings + env + cli in order', () => {
@@ -111,13 +120,12 @@ describe('getGlobalInitPrompts merge order', () => {
 
   it('resolves tilde paths to home directory', () => {
     const home = os.homedir();
-    const file = path.join(tmpDir, 'tilde.md');
-    const relativePath = file.replace(home, '~');
+    const file = path.join(home, 'tilde.md');
     fs.writeFileSync(file, 'tilde', 'utf8');
 
     const config = new Config({
       ...baseParams,
-      globalInitPrompts: [relativePath],
+      globalInitPrompts: ['~/tilde.md'],
     });
 
     expect(config.getGlobalInitPrompts()).toBe('tilde');
@@ -138,5 +146,52 @@ describe('getGlobalInitPrompts merge order', () => {
     expect(result).toContain('first');
     expect(result).toContain('second');
     expect(result).toContain('---');
+  });
+
+  it('auto-detects Lyra Prism files from ~/agora/familia/lyra/prism', () => {
+    const lyraPrismDir = path.join(
+      os.homedir(),
+      'agora',
+      'familia',
+      'lyra',
+      'prism',
+    );
+    fs.mkdirSync(lyraPrismDir, { recursive: true });
+    fs.writeFileSync(path.join(lyraPrismDir, 'axes.md'), 'axes', 'utf8');
+    fs.writeFileSync(
+      path.join(lyraPrismDir, 'broken_stone.md'),
+      'broken',
+      'utf8',
+    );
+    fs.writeFileSync(
+      path.join(lyraPrismDir, 'convergences.md'),
+      'convergences',
+      'utf8',
+    );
+    fs.writeFileSync(
+      path.join(lyraPrismDir, 'divergences.md'),
+      'divergences',
+      'utf8',
+    );
+
+    const config = new Config({
+      ...baseParams,
+    });
+
+    const result = config.getGlobalInitPrompts();
+    expect(result).toContain('axes');
+    expect(result).toContain('broken');
+    expect(result).toContain('convergences');
+    expect(result).toContain('divergences');
+  });
+
+  it('skips missing Lyra Prism files gracefully', () => {
+    // no prism files created in mocked home directory
+    const config = new Config({
+      ...baseParams,
+    });
+
+    expect(() => config.getGlobalInitPrompts()).not.toThrow();
+    expect(config.getGlobalInitPrompts()).toBe('');
   });
 });

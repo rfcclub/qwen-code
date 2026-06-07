@@ -3470,6 +3470,27 @@ export class Config {
       ...this.initPromptsFromCli,
     ];
 
+    // Auto-detect Lyra Prism files
+    const lyraPrismDir = path.join(
+      homedir(),
+      'agora',
+      'familia',
+      'lyra',
+      'prism',
+    );
+    const lyraPrismFiles = [
+      'axes.md',
+      'broken_stone.md',
+      'convergences.md',
+      'divergences.md',
+    ];
+    for (const file of lyraPrismFiles) {
+      const filePath = path.join(lyraPrismDir, file);
+      if (fs.existsSync(filePath)) {
+        allPaths.push(filePath);
+      }
+    }
+
     // Check mtimes for cache invalidation
     const currentMtimes = allPaths.map((filePath) => {
       try {
