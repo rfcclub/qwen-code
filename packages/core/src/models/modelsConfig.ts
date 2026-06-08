@@ -108,6 +108,9 @@ export class ModelsConfig {
   // Callback for notifying Config of model changes
   private onModelChange?: OnModelChangeCallback;
 
+  // Raw modelProvidersConfig for escalation chain access
+  private _modelProvidersConfig?: ModelProvidersConfig;
+
   // Flag indicating whether authType was explicitly provided (not defaulted)
   private readonly authTypeWasExplicitlyProvided: boolean;
 
@@ -158,6 +161,7 @@ export class ModelsConfig {
       options.providerProtocolConfig,
     );
     this.onModelChange = options.onModelChange;
+    this._modelProvidersConfig = options.modelProvidersConfig;
 
     // Initialize generation config
     // Note: generationConfig.model should already be fully resolved by ModelConfigResolver
@@ -240,6 +244,13 @@ export class ModelsConfig {
    */
   getModel(): string {
     return this._generationConfig.model || DEFAULT_QWEN_MODEL;
+  }
+
+  /**
+   * Get raw modelProvidersConfig for escalation chain access.
+   */
+  getModelProvidersConfig(): ModelProvidersConfig | undefined {
+    return this._modelProvidersConfig;
   }
 
   /**

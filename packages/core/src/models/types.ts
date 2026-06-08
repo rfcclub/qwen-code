@@ -86,9 +86,15 @@ export interface EscalationStep {
 
 /**
  * Model providers configuration grouped by provider id.
+ * Supports known escalation keys alongside provider/authType keys.
  */
 export type ModelProvidersConfig = {
-  [providerId: string]: ModelConfig[];
+  [providerId: string]:
+    | ModelConfig[]
+    | EscalationStep[]
+    | number
+    | boolean
+    | undefined;
 };
 
 /**

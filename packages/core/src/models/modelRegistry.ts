@@ -126,6 +126,11 @@ export class ModelRegistry {
     if (!modelProvidersConfig) return;
 
     for (const [providerId, models] of Object.entries(modelProvidersConfig)) {
+      // Skip non-model entries (e.g., escalation settings)
+      if (!Array.isArray(models)) {
+        continue;
+      }
+
       const protocol = resolveProviderProtocol(
         providerId,
         this.providerProtocolConfig,

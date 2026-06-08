@@ -12,23 +12,19 @@ describe('SmallModelMiddleware quality escalation', () => {
   it('throws QualityEscalationError after 3 quality failures', () => {
     const mw = new SmallModelMiddleware(32_768, []);
 
-    // 3 failed attempts with empty turns
-    for (let i = 0; i < 3; i++) {
-      mw.postResponse('', []);
-    }
-
+    // 3 failed attempts (threshold is 3, throws on 3rd)
+    mw.postResponse('', []);
+    mw.postResponse('', []);
     expect(() => mw.postResponse('', [])).toThrow(QualityEscalationError);
   });
 
   it('does not throw before threshold', () => {
     const mw = new SmallModelMiddleware(32_768, []);
 
-    // 3 failed attempts (threshold is 3, so 4th should throw)
-    mw.postResponse('', []);
-    mw.postResponse('', []);
+    // 1 failed attempt (threshold is 3, 2nd should not throw yet)
     mw.postResponse('', []);
 
-    expect(() => mw.postResponse('', [])).toThrow(QualityEscalationError);
+    expect(() => mw.postResponse('', [])).not.toThrow();
   });
 
   it('resets attempt count on successful turn', () => {
@@ -41,8 +37,7 @@ describe('SmallModelMiddleware quality escalation', () => {
     // Reset
     mw.resetRetries();
 
-    // 3 failures after reset (threshold is 3, so 4th should throw)
-    mw.postResponse('', []);
+    // 2 failures after reset (threshold is 3, should not throw yet)
     mw.postResponse('', []);
     mw.postResponse('', []);
     expect(() => mw.postResponse('', [])).toThrow(QualityEscalationError);
@@ -51,7 +46,7 @@ describe('SmallModelMiddleware quality escalation', () => {
   it('escalation error includes quality issues', () => {
     const mw = new SmallModelMiddleware(32_768, []);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       mw.postResponse('', []);
     }
 

@@ -16,7 +16,8 @@ export type EscalationTrigger =
   | 'context_overflow'
   | 'max_tokens'
   | 'quality_failure'
-  | 'timeout';
+  | 'timeout'
+  | '*';
 
 /**
  * Classify an error into escalation triggers.

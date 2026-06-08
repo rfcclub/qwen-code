@@ -5,7 +5,7 @@
  */
 
 import type { AuthType } from '../core/contentGenerator.js';
-import type { ModelProvidersConfig } from '../models/types.js';
+import type { ModelConfig, ModelProvidersConfig } from '../models/types.js';
 import type {
   ProviderInstallPlan,
   ProviderModelProvidersPatch,
@@ -47,7 +47,10 @@ function applyModelProvidersPatch(
   existingModelProviders: ModelProvidersConfig,
   patch: ProviderModelProvidersPatch,
 ): ModelProvidersConfig {
-  const existingModels = existingModelProviders[patch.authType] ?? [];
+  const rawExisting = existingModelProviders[patch.authType];
+  const existingModels = Array.isArray(rawExisting)
+    ? (rawExisting as ModelConfig[])
+    : [];
 
   let updatedModels = patch.models;
   if (patch.mergeStrategy === 'append') {

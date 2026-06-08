@@ -52,8 +52,6 @@ function findModelConfig(
     authType,
   );
   if (models.length === 0) {
-    return undefined;
-  }
 
   if (baseUrl) {
     return (

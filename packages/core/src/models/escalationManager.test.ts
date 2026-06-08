@@ -18,8 +18,8 @@ function createMockConfig(
     getAuthType: () => 'qwen_oauth',
     getModelsConfig: () =>
       ({
-        modelProvidersConfig: providers,
-      }) as unknown as Config['getModelsConfig'],
+        getModelProvidersConfig: () => providers,
+      }) as unknown as ReturnType<Config['getModelsConfig']>,
     setModel: vi.fn(),
   } as unknown as Config;
 }

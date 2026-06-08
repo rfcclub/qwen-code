@@ -2656,6 +2656,7 @@ export class GeminiChat {
                   // Reset retry counters for new model
                   rateLimitRetryCount = 0;
                   invalidStreamRetryCount = 0;
+                  reactiveCompressionAttempted = false;
                   attempt = -1;
                   continue;
                 }

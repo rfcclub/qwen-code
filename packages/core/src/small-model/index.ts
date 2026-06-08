@@ -180,10 +180,11 @@ export class SmallModelMiddleware {
     }
 
     // 2. Quality check
+    let hasError = false;
     if (this.config.qualityMonitorEnabled) {
       ctx.qualityIssues = this.quality.checkTurn(text, ctx.toolCalls);
 
-      const hasError = ctx.qualityIssues.some((i) => i.severity === 'error');
+      hasError = ctx.qualityIssues.some((i) => i.severity === 'error');
       if (hasError) {
         ctx.shouldRetry = true;
         ctx.retryReason = ctx.qualityIssues
@@ -193,6 +194,7 @@ export class SmallModelMiddleware {
 
         // Trigger model escalation if quality failures persist (gap-4)
         const QUALITY_ESCALATION_THRESHOLD = 3;
+        this.attemptCount++;
         if (this.attemptCount >= QUALITY_ESCALATION_THRESHOLD) {
           throw new QualityEscalationError(
             `Quality failures persisted after ${this.attemptCount} attempts: ${ctx.retryReason}`,
@@ -203,8 +205,10 @@ export class SmallModelMiddleware {
       }
     }
 
-    // 3. Track attempt count
-    this.attemptCount++;
+    // 3. Track attempt count for non-error turns
+    if (!hasError) {
+      this.attemptCount++;
+    }
 
     return ctx;
   }

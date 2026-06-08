@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classifyErrorForEscalation,
   shouldEscalateOnError,
+  type EscalationTrigger,
 } from './escalationErrors.js';
 import { QualityEscalationError } from '../small-model/escalation-error.js';
 
@@ -69,7 +70,9 @@ describe('classifyErrorForEscalation', () => {
 
 describe('shouldEscalateOnError', () => {
   it('matches wildcard', () => {
-    expect(shouldEscalateOnError(['auth_error'], ['*' as never])).toBe(true);
+    expect(
+      shouldEscalateOnError(['auth_error'], ['*' as EscalationTrigger]),
+    ).toBe(true);
   });
 
   it('matches specific trigger', () => {

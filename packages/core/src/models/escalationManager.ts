@@ -35,15 +35,20 @@ export class EscalationManager {
 
   /** Load escalation chain from model providers config. */
   private loadChainConfig(): void {
-    const mpc = this.config.getModelsConfig?.();
-    const providers = (
-      mpc as { modelProvidersConfig?: Record<string, unknown> } | undefined
-    )?.modelProvidersConfig;
-    if (providers?.['escalationChain']) {
+    const providers = this.config
+      .getModelsConfig?.()
+      .getModelProvidersConfig?.();
+    if (!providers) return;
+    const extended = providers as {
+      escalationChain?: EscalationStep[];
+      escalationMaxSteps?: number;
+      escalationRestoreOriginal?: boolean;
+    };
+    if (extended.escalationChain) {
       this.chainConfig = {
-        chain: providers['escalationChain'] as EscalationStep[],
-        maxSteps: providers['escalationMaxSteps'] as number | undefined,
-        restoreOriginal: providers['escalationRestoreOriginal'] !== false,
+        chain: extended.escalationChain,
+        maxSteps: extended.escalationMaxSteps,
+        restoreOriginal: extended.escalationRestoreOriginal !== false,
       };
     }
   }
@@ -61,6 +66,10 @@ export class EscalationManager {
   /** Check if the error should trigger escalation to the next step. */
   shouldEscalate(error: unknown): boolean {
     if (!this.hasChain()) return false;
+
+    const maxSteps =
+      this.chainConfig!.maxSteps ?? this.chainConfig!.chain.length;
+    if (this.currentStep >= maxSteps) return false;
 
     const errorTriggers = classifyErrorForEscalation(error);
     if (errorTriggers.length === 0) return false;

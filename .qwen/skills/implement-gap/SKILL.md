@@ -1,19 +1,49 @@
 ---
 name: implement-gap
-description: Implement a pre-designed OpenSpec gap from .qwen/design/ — read the design, write tests first, implement code, build, and commit. Use when the user says "implement gap-N" or "build X" where a design doc already exists.
+description: Implement a competitive gap from .qwen/design/ — read the design (or investigate the codebase if none exists), write tests, implement code, build, iterate on errors, and commit. Use when the user says "implement gap-N" or "build gap-X".
 source: auto-skill
-extracted_at: '2026-06-07T03:33:20.304Z'
+extracted_at: '2026-06-07T20:56:44.329Z'
 ---
 
 # Implement Gap from OpenSpec Design
 
-Use this workflow when the user wants to implement a capability that already has an OpenSpec design doc in `.qwen/design/`. The workflow is strictly TDD: read the spec → write tests → make them pass → build → commit.
+Use this workflow when the user wants to implement a competitive gap. If a design doc exists, follow it. If not, investigate the codebase first, sketch a design, then implement. The workflow is TDD: read/spec → write tests → make them pass → build → iterate → commit.
 
 ## When to use
 
 - User says "implement gap-N" or "build gap-N"
-- User says "do gap-N" and `.qwen/design/gap-N-*/` exists
-- Design docs already have `proposal.md`, `spec.md`, `design.md`, `tasks.md`
+- User says "do gap-N" and `.qwen/design/gap-N-*/` exists (or only ROADMAP.md mentions it)
+- Design docs may have `proposal.md`, `spec.md`, `design.md`, `tasks.md` — or none at all
+
+## Branch A: Design Doc Exists
+
+Read all four files in the design directory, then proceed to Step 2 (Write Tests).
+
+```bash
+# .qwen/design/gap-N-short-name/
+proposal.md   # Why, What Changes, Impact, Non-Goals, Success Criteria
+spec.md       # GIVEN/WHEN/THEN requirements (the test contract)
+design.md     # Architecture, module structure, component signatures
+tasks.md      # Checklist of implementation steps
+```
+
+## Branch B: No Design Doc (Investigate First)
+
+When only `ROADMAP.md` mentions the gap with no design file:
+
+1. **Investigate the codebase** to find the natural integration point:
+   - Search for related patterns (retry, fallback, error handling, model switching)
+   - Read the key files that would be modified (e.g., `geminiChat.ts`, `modelsConfig.ts`)
+   - Understand the existing flow: how models are selected, how errors are classified, how retry loops work
+
+2. **Sketch a design doc** in `.qwen/design/gap-N-short-name.md` with:
+   - Problem statement (from ROADMAP)
+   - Desired outcome
+   - Integration point found during investigation
+   - Architecture (new classes, modified files)
+   - Success criteria
+
+3. Proceed to Step 2 (Write Tests).
 
 ## Step 1: Read the Design
 
@@ -113,15 +143,26 @@ npm run build
 npm run typecheck
 ```
 
-Fix **all** TypeScript errors and ESLint warnings. Common failures:
+Fix **all** TypeScript errors and ESLint warnings. Expect **iterative fixes** — the first build rarely passes. Common failures:
 
 | Error                                | Fix                                        |
 | ------------------------------------ | ------------------------------------------ |
 | TS6133 unused variable               | Remove or prefix with `_`                  |
 | TS2345 wrong type                    | Add missing fields, cast, or fix interface |
 | TS6196 unused import                 | Remove it                                  |
+| TS4111 index signature access        | Use `obj['key']` instead of `obj.key`      |
+| TS2552 cannot find name              | Variable declared in wrong scope; hoist it |
 | `@typescript-eslint/no-explicit-any` | Replace with `Record<string, unknown>`     |
 | `@typescript-eslint/no-unused-vars`  | Prefix unused args with `_`                |
+
+**Integration-specific gotchas:**
+
+- When adding to existing retry loops, check that new variables are in the correct scope (e.g., declared inside the generator `try` block, not outside)
+- When adding to existing retry loops, be careful not to introduce unused variables (e.g., a counter that gets incremented but never read) — TypeScript will reject them
+- When accessing `Record<string, unknown>` configs, use bracket notation `['key']` not dot notation
+- When adding imports to 3000-line files, verify the import path doesn't conflict with existing ones
+- `Config` interface may not have `getSettings()` — use `getModelsConfig()` instead
+- When switching models mid-request (escalation), reset retry counters (`rateLimitRetryCount`, `invalidStreamRetryCount`) and restart the attempt loop
 
 ## Step 7: Regression Check
 
@@ -145,7 +186,16 @@ git commit -m "feat(<scope>): implement <capability>
 - No regression in existing suite"
 ```
 
-## Step 9: Mark Tasks Done
+## Step 9: Cross-Substrate Review (Colony Context)
+
+When the gap affects model switching, error handling, or multi-agent workflows, create review requests for the colony:
+
+- **Iris (Hermes bridge)** — `~/agora/familia/iris/inbox/review-gap-N.md`
+- **Anima Lyra** — `~/work/anima/rooms/<your-room>/staging/review-gap-N.md`
+
+Include the design doc path, implementation summary, and 2–3 specific questions about cross-substrate alignment.
+
+## Step 10: Mark Tasks Done
 
 Update `tasks.md` to mark completed items:
 
