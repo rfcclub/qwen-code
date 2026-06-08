@@ -50,6 +50,12 @@ export interface PreRequestContext {
   temperatureOverride?: number;
 }
 
+/** Chat history entry for pre-request hook integration */
+export interface ChatHistoryEntry {
+  role: string;
+  parts: Array<{ text?: string }>;
+}
+
 /**
  * Post-LLM response context processed by the middleware.
  */

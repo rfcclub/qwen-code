@@ -2505,13 +2505,20 @@ export class GeminiClient {
 
       // ── Small-Model Optimization: pre-request hook ──────────────
       const middleware = this.ensureSmallModelMiddleware();
-      if (middleware && middleware.config.enableTodoPlanning) {
-        const todoContext = middleware.plan.getTodoContext();
-        if (todoContext) {
-          // Prepend as a system reminder — requestToSend is (string | Part)[]
-          // with system-reminder strings at the front.
-          requestToSend = [todoContext, ...requestToSend];
-        }
+      if (middleware) {
+        const history = this.getHistory();
+        const preCtx = middleware.preRequest({
+          messages: history
+            .filter((h) => h.role && h.parts)
+            .map((h) => ({
+              role: h.role!,
+              content: partToString(h.parts!),
+            })),
+        });
+        // Temperature override is currently unused; the retry loop in
+        // geminiChat.ts handles adaptive temperature.  Leave preCtx
+        // return value available for future wiring.
+        void preCtx;
       }
       // ─────────────────────────────────────────────────────────────
 
@@ -2665,6 +2672,29 @@ export class GeminiClient {
 
       // Track API completion time for thinking block idle cleanup
       this.lastApiCompletionTimestamp = Date.now();
+
+      // ── Small-Model Optimization: post-response hook ───────────
+      if (middleware) {
+        const responseText = this.getLastModelMessageText() ?? '';
+        const rawToolCalls = turn.pendingToolCalls.map((tc) => ({
+          name: tc.name,
+          params: tc.args,
+        }));
+        try {
+          middleware.postResponse(responseText, rawToolCalls);
+        } catch (error) {
+          // QualityEscalationError propagates to trigger gap-4 escalation
+          if (
+            error instanceof Error &&
+            error.name === 'QualityEscalationError'
+          ) {
+            throw error;
+          }
+          // Log other errors but don't block the turn
+          debugLogger.warn(`Small-model postResponse failed: ${error}`);
+        }
+      }
+      // ─────────────────────────────────────────────────────────────
 
       if (!turn.pendingToolCalls.length) {
         const steerTurnBudget = boundedTurns - 1;

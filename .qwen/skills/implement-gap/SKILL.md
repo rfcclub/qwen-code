@@ -1,8 +1,8 @@
 ---
 name: implement-gap
-description: Implement a competitive gap from .qwen/design/ — read the design (or investigate the codebase if none exists), write tests, implement code, build, iterate on errors, and commit. Use when the user says "implement gap-N" or "build gap-X".
+description: Implement a competitive gap from .qwen/design/ — read the design (or investigate the codebase if none exists), write tests, implement code, self-review, build, iterate on errors, and commit. Use when the user says "implement gap-N" or "build gap-X".
 source: auto-skill
-extracted_at: '2026-06-07T20:56:44.329Z'
+extracted_at: '2026-06-08T00:09:46.666Z'
 ---
 
 # Implement Gap from OpenSpec Design
@@ -136,7 +136,32 @@ cd packages/core && npx vitest run src/<new-capability>/
 
 All tests should pass. If not, fix the code or the test — never skip.
 
-## Step 6: Build + Typecheck
+## Step 6: Self-Review (Critical)
+
+Before building, **review your own implementation** as if you were a second engineer. Read every file you wrote and ask:
+
+- **Does the implementation match the design?** Any missing pieces?
+- **Are there edge cases not handled?** (e.g., empty chain, exhausted chain, cross-authType switch)
+- **Is the error classification complete?** Any missing error types?
+- **Is the test coverage adequate?** Any untested paths?
+- **Are there TypeScript type safety issues?** Potential runtime bugs hidden by casts?
+- **Are there off-by-one errors?** (e.g., threshold checks, loop bounds)
+- **Is there dead code?** (e.g., a class thrown but never caught in the real pipeline)
+- **Does integration properly reset state?** (retry counters, flags, etc.)
+- **Is there potential for infinite loops?** (escalation loops, retry loops)
+- **Is the design extensible?** (e.g., can new triggers be added easily?)
+
+**Common self-review findings for this codebase:**
+
+- A config type cast compiles but silently returns `undefined` at runtime (e.g., `ModelProvidersConfig` index access)
+- A variable declared in a narrow scope is accessed outside it (e.g., `escalationManager` declared in `for` loop but used in `finally`)
+- `postResponse()` or `preRequest()` is called in tests but never wired into the production pipeline
+- Retry counters or flags (e.g., `reactiveCompressionAttempted`) are not reset when switching to a new model
+- An off-by-one error where the threshold check happens after increment instead of before
+
+**Fix all findings before building.** Do not defer to "later."
+
+## Step 7: Build + Typecheck
 
 ```bash
 npm run build
@@ -164,7 +189,7 @@ Fix **all** TypeScript errors and ESLint warnings. Expect **iterative fixes** �
 - `Config` interface may not have `getSettings()` — use `getModelsConfig()` instead
 - When switching models mid-request (escalation), reset retry counters (`rateLimitRetryCount`, `invalidStreamRetryCount`) and restart the attempt loop
 
-## Step 7: Regression Check
+## Step 8: Regression Check
 
 Run the existing test suite to confirm no breakage:
 
@@ -174,7 +199,7 @@ cd packages/core && npx vitest run --no-watch
 
 Failures in existing tests are regressions. Fix them before committing.
 
-## Step 8: Commit
+## Step 9: Commit
 
 ```bash
 git add packages/core/src/<new-capability>/
@@ -186,7 +211,7 @@ git commit -m "feat(<scope>): implement <capability>
 - No regression in existing suite"
 ```
 
-## Step 9: Cross-Substrate Review (Colony Context)
+## Step 10: Cross-Substrate Review (Colony Context)
 
 When the gap affects model switching, error handling, or multi-agent workflows, create review requests for the colony:
 
@@ -195,7 +220,7 @@ When the gap affects model switching, error handling, or multi-agent workflows, 
 
 Include the design doc path, implementation summary, and 2–3 specific questions about cross-substrate alignment.
 
-## Step 10: Mark Tasks Done
+## Step 11: Mark Tasks Done
 
 Update `tasks.md` to mark completed items:
 
@@ -209,6 +234,7 @@ Update `tasks.md` to mark completed items:
 
 - Do not skip the "read design" step. The spec is your contract.
 - Do not write implementation before tests. TDD order is mandatory.
+- Do not skip the "self-review" step. Many bugs are found only by re-reading your own code.
 - Do not commit if build or typecheck fails. Fix first.
 - Do not commit if existing tests fail. Regression first.
 - If the design doc is wrong (outdated, impossible), update the doc, then re-read.
