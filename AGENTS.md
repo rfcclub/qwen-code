@@ -324,3 +324,23 @@ Other working artifacts live under `.qwen/` (git-ignored):
 | `.qwen/pr-reviews/`     | PR review notes                      |
 | `.qwen/investigations/` | Structured debugging journals        |
 | `.qwen/scripts/`        | Utility scripts                      |
+
+## LoomKit — Quality Harness
+
+Every feature, bug fix, and refactor goes through LoomKit. No exceptions.
+
+**Workflow:** Intent → Spec → Design → Plan → TDD → Verify → Archive
+
+| Phase   | Command                  | Output                                   |
+| ------- | ------------------------ | ---------------------------------------- |
+| Intent  | `loomkit intent <name>`  | `openspec/changes/<name>/intent.md`      |
+| Spec    | `loomkit spec <name>`    | spec.md — WHEN/THEN requirements         |
+| Design  | `loomkit design <name>`  | design.md — architecture + test strategy |
+| Plan    | `loomkit plan <name>`    | tasks.md — exact code, no placeholders   |
+| TDD     | implement                | RED → GREEN → REFACTOR per task          |
+| Verify  | `loomkit verify <name>`  | .loomkit-verify.json coverage gate       |
+| Archive | `loomkit archive <name>` | merged into living specs                 |
+
+**TDD Iron Law:** No production code without a failing test first. Delete code written before its test.
+**Exceptions:** hotfix < 3 lines · typo · config value only — skip LoomKit.
+**Status:** `loomkit status` — all changes + coverage at a glance.
